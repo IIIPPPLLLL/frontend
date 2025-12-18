@@ -30,6 +30,11 @@
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "maskable"
+        },
+        {
+            "src": "web/icon/Designer1.png",
+            "sizes": "512x512",
+            "type": "image/png"
         }
     ]
 }
