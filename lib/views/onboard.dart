@@ -1,38 +1,5 @@
 import 'package:flutter/material.dart';
-
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: const Color.fromARGB(255, 18, 32, 47),
-      ),
-      home: Scaffold(
-        body: SafeArea(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: 500, // Maksimal untuk tablet
-                maxHeight: 900,
-              ),
-              child: const AspectRatio(
-                aspectRatio: 393 / 852, // Rasio original design
-                child: AOnBoarding(),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
+import '../routes/app_routes.dart';
 
 class AOnBoarding extends StatelessWidget {
   const AOnBoarding({super.key});
@@ -139,7 +106,10 @@ class AOnBoarding extends StatelessWidget {
               height: 55,
               child: ElevatedButton(
                 onPressed: () {
-                  // TODO: Aksi tombol
+                  Navigator.pushReplacementNamed(
+                    context,
+                    AppRoutes.onboard2,
+                  );
                   debugPrint('Get Started clicked');
                 },
                 style: ElevatedButton.styleFrom(

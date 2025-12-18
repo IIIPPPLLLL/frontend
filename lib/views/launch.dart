@@ -1,29 +1,81 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import '../routes/app_routes.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class OnBoardingScreen extends StatelessWidget {
+  const OnBoardingScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: const Color.fromARGB(255, 18, 32, 47),
+    return Scaffold(
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () {
+            Navigator.pushReplacementNamed(
+              context,
+              AppRoutes.onboard2,
+            );
+          },
+          child: const Text('Get Started'),
+        ),
       ),
-      home: Scaffold(
+    );
+  }
+}
+
+class AnimatedSplashScreen extends StatefulWidget {
+  const AnimatedSplashScreen({super.key});
+
+  @override
+  State<AnimatedSplashScreen> createState() => _AnimatedSplashScreenState();
+}
+
+class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
+    with SingleTickerProviderStateMixin {
+
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    );
+
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    );
+
+    _controller.forward();
+
+    // ⏱ PINDAH KE ONBOARD 1
+    Timer(const Duration(seconds: 3), () {
+      Navigator.pushReplacementNamed(
+        context,
+        AppRoutes.onboard1,
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _animation,
+      child: const Scaffold(
         body: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: 500, // Maksimal width untuk tablet
-              maxHeight: 900, // Maksimal height
-            ),
-            child: const AspectRatio(
-              aspectRatio: 393/852, // Original aspect ratio dari design (393x852)
-              child: ALaunch(),
-            ),
+          child: Text(
+            'SPLASH SCREEN',
+            style: TextStyle(fontSize: 24),
           ),
         ),
       ),
