@@ -116,7 +116,7 @@ class BOnBoarding extends StatelessWidget {
                     onPressed: () {
                       Navigator.pushReplacementNamed(
                         context,
-                        AppRoutes.onboard2,
+                        AppRoutes.onboard4,
                       );
                     },
                     style: ElevatedButton.styleFrom(
