@@ -44,6 +44,7 @@ class AOnBoarding extends StatelessWidget {
                 fontSize: 25.47,
                 fontFamily: 'League Spartan',
                 fontWeight: FontWeight.w700,
+                decoration: TextDecoration.none,
                 height: 1.08,
               ),
             ),
@@ -85,6 +86,7 @@ class AOnBoarding extends StatelessWidget {
                 fontStyle: FontStyle.italic,
                 fontFamily: 'Poppins',
                 fontWeight: FontWeight.w800,
+                decoration: TextDecoration.none,
                 shadows: [
                   Shadow(
                     color: Colors.black.withOpacity(0.7),

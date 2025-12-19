@@ -16,7 +16,6 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: const Color.fromARGB(255, 18, 32, 47),
       ),
 
-      // 🔥 ROUTING SYSTEM AKTIF
       initialRoute: AppRoutes.splash,
       routes: AppRoutes.routes,
     );
