@@ -198,7 +198,7 @@ class ALogIn extends StatelessWidget {
                   height: 44,
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.pushReplacementNamed(context, AppRoutes.login);
+                      Navigator.pushNamed(context, AppRoutes.setup);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,

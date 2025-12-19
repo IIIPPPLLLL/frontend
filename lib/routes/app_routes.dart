@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:impal/views/Setup.dart';
 import 'package:impal/views/signup.dart';
 import '../views/launch.dart';
 import '../views/onboard.dart';
@@ -16,6 +17,7 @@ class AppRoutes {
   static const String onboard3 = '/onboard3';
   static const String login = '/login';
   static const String signup = '/signup';
+  static const String setup = '/setup';
 
   static final Map<String, WidgetBuilder> routes = {
     splash: (context) => const AnimatedSplashScreen(),
@@ -24,6 +26,7 @@ class AppRoutes {
     onboard4: (context) => const DOnBoarding(),
     onboard3: (context) => const COnBoarding(),
     login: (context) => const ALogIn(),
-    signup: (context) => const BSignUp()
+    signup: (context) => const BSignUp(),
+    setup : (context) => const ASetUp(),
   };
 }

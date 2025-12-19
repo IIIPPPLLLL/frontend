@@ -67,7 +67,7 @@ class BSignUp extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Email',
+                        'Username or email',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 18,
@@ -77,29 +77,38 @@ class BSignUp extends StatelessWidget {
                       ),
                       const SizedBox(height: 10),
                       Container(
-                        width: double.infinity,
                         height: 45,
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(15),
+                          border: Border.all(color: Colors.white),
                         ),
-                        child: const Padding(
-                          padding: EdgeInsets.only(left: 16, top: 13),
-                          child: Text(
-                            'example@example.com',
-                            style: TextStyle(
-                              color: Color(0xFF232222),
+                        child: TextField(
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 15,
+                              vertical: 12,
+                            ),
+                            hintText: 'example@example.com',
+                            hintStyle: TextStyle(
+                              color: const Color(0xFF232222).withOpacity(0.7),
                               fontSize: 16,
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w400,
                             ),
                           ),
+                          style: TextStyle(
+                            color: const Color(0xFF232222),
+                            fontSize: 16,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w400,
+                          ),
                         ),
                       ),
                     ],
                   ),
-
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 25),
 
                   // Password Field
                   Column(
@@ -116,30 +125,41 @@ class BSignUp extends StatelessWidget {
                       ),
                       const SizedBox(height: 10),
                       Container(
-                        width: double.infinity,
                         height: 45,
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(15),
+                          border: Border.all(color: Colors.white),
                         ),
-                        child: const Padding(
-                          padding: EdgeInsets.only(left: 16, top: 13),
-                          child: Text(
-                            '*************',
-                            style: TextStyle(
-                              color: Color(0xFF232222),
+                        child: TextField(
+                          obscureText: true,
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 15,
+                              vertical: 12,
+                            ),
+                            hintText: '*************',
+                            hintStyle: TextStyle(
+                              color: const Color(0xFF232222).withOpacity(0.7),
                               fontSize: 16,
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w400,
                               letterSpacing: 3.68,
                             ),
                           ),
+                          style: TextStyle(
+                            color: const Color(0xFF232222),
+                            fontSize: 16,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w400,
+                            letterSpacing: 3.68,
+                          ),
                         ),
                       ),
                     ],
                   ),
-
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 25),
 
                   // Confirm Password Field
                   Column(
@@ -156,30 +176,41 @@ class BSignUp extends StatelessWidget {
                       ),
                       const SizedBox(height: 10),
                       Container(
-                        width: double.infinity,
                         height: 45,
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(15),
+                          border: Border.all(color: Colors.white),
                         ),
-                        child: const Padding(
-                          padding: EdgeInsets.only(left: 16, top: 13),
-                          child: Text(
-                            '*************',
-                            style: TextStyle(
-                              color: Color(0xFF232222),
+                        child: TextField(
+                          obscureText: true,
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 15,
+                              vertical: 12,
+                            ),
+                            hintText: '*************',
+                            hintStyle: TextStyle(
+                              color: const Color(0xFF232222).withOpacity(0.7),
                               fontSize: 16,
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w400,
                               letterSpacing: 3.68,
                             ),
                           ),
+                          style: TextStyle(
+                            color: const Color(0xFF232222),
+                            fontSize: 16,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w400,
+                            letterSpacing: 3.68,
+                          ),
                         ),
                       ),
                     ],
                   ),
-
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 25),
 
                   // Terms and Privacy
                   const Padding(

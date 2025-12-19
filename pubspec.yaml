@@ -69,6 +69,7 @@ flutter:
     - assets/images/google.png
     - assets/images/fb.png
     - assets/images/x.png
+    - assets/images/background-setup.png
     #icons
     - assets/icons/
 
