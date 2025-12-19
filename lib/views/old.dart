@@ -232,9 +232,9 @@ class _AHowOldState extends State<AHowOld> {
                   child: TextButton(
                     onPressed: () {
                       // kalau mau kirim age ke page berikut:
-                      Navigator.pushReplacementNamed(
+                      Navigator.pushNamed(
                         context,
-                        AppRoutes.gender,
+                        AppRoutes.old,
                         arguments: _age,
                       );
                     },
