@@ -323,7 +323,7 @@ class _WeightState extends State<Weight> {
                     onPressed: () {
                       Navigator.pushNamed(
                         context,
-                        AppRoutes.weight,
+                        AppRoutes.activity,
                         arguments: {
                           'unit': unit,
                           'weightKg': _weightKg,
