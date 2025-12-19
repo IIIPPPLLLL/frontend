@@ -234,7 +234,7 @@ class _AHowOldState extends State<AHowOld> {
                       // kalau mau kirim age ke page berikut:
                       Navigator.pushNamed(
                         context,
-                        AppRoutes.old,
+                        AppRoutes.height,
                         arguments: _age,
                       );
                     },

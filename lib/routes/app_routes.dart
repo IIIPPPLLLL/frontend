@@ -10,6 +10,7 @@ import '../views/login.dart';
 import '../views/signup.dart';
 import '../views/gender.dart';
 import '../views/old.dart';
+import '../views/height.dart';
 
 class AppRoutes {
   static const String splash = '/';
@@ -22,6 +23,7 @@ class AppRoutes {
   static const String setup = '/setup';
   static const String gender = '/gender';
   static const String old = '/old';
+  static const String height = '/height';
 
 
 
@@ -35,7 +37,8 @@ class AppRoutes {
     signup: (context) => const BSignUp(),
     setup : (context) => const ASetUp(),
     gender: (context) => const GenderA(),
-    old: (context) => const AHowOld()
+    old: (context) => const AHowOld(),
+    height: (context) => const Height()
 
   };
 }
