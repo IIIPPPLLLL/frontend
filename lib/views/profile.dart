@@ -223,7 +223,7 @@ class _ProfileState extends State<Profile> {
                         // contoh passing data
                         Navigator.pushNamed(
                           context,
-                          AppRoutes.profile,
+                          AppRoutes.goal,
                           arguments: {
                             'fullName': _fullNameC.text.trim(),
                             'nickName': _nickNameC.text.trim(),
