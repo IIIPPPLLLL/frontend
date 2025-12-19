@@ -60,6 +60,7 @@ flutter:
     - assets/images/logo-launch.png
     - assets/images/logo-onboard.png
     - assets/images/background-onboard.png
+    - assets/images/background-onboard3.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:
