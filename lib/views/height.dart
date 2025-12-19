@@ -267,7 +267,7 @@ class _HeightState extends State<Height> {
                     onPressed: () {
                       Navigator.pushNamed(
                         context,
-                        AppRoutes.height,
+                        AppRoutes.weight,
                         arguments: _height,
                       );
                     },
