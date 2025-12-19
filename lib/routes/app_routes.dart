@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:impal/views/signup.dart';
 import '../views/launch.dart';
 import '../views/onboard.dart';
 import '../views/onboard2.dart';
 import '../views/onboard4.dart';
 import '../views/onboard3.dart';
 import '../views/login.dart';
+import '../views/signup.dart';
 
 class AppRoutes {
   static const String splash = '/';
@@ -13,6 +15,7 @@ class AppRoutes {
   static const String onboard4 = '/onboard4';
   static const String onboard3 = '/onboard3';
   static const String login = '/login';
+  static const String signup = '/signup';
 
   static final Map<String, WidgetBuilder> routes = {
     splash: (context) => const AnimatedSplashScreen(),
@@ -20,6 +23,7 @@ class AppRoutes {
     onboard2: (context) => const BOnBoarding(),
     onboard4: (context) => const DOnBoarding(),
     onboard3: (context) => const COnBoarding(),
-    login: (context) => const ALogIn()
+    login: (context) => const ALogIn(),
+    signup: (context) => const BSignUp()
   };
 }

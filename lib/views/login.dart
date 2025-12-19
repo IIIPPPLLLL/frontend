@@ -342,7 +342,7 @@ class ALogIn extends StatelessWidget {
                         WidgetSpan(
                           child: GestureDetector(
                             onTap: () {
-                              Navigator.pushNamed(context, AppRoutes.login);
+                              Navigator.pushNamed(context, AppRoutes.signup);
                             },
                             child: Text(
                               'Sign Up',
