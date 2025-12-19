@@ -93,7 +93,7 @@ class ASetUp extends StatelessWidget {
                 top: 800,
                 child: GestureDetector(
                   onTap: () {
-                    Navigator.pushNamed(context, AppRoutes.splash);
+                    Navigator.pushNamed(context, AppRoutes.gender);
                   },
                   child: Container(
                     width: 178.56,
