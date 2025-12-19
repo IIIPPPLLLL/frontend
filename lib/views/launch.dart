@@ -53,7 +53,7 @@ class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
     _controller.forward();
 
     // ⏱ PINDAH KE ONBOARD 1
-    Timer(const Duration(seconds: 3), () {
+    Timer(const Duration(seconds: 5), () {
       Navigator.pushReplacementNamed(
         context,
         AppRoutes.onboard1,
@@ -72,12 +72,7 @@ class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
     return FadeTransition(
       opacity: _animation,
       child: const Scaffold(
-        body: Center(
-          child: Text(
-            'SPLASH SCREEN',
-            style: TextStyle(fontSize: 24),
-          ),
-        ),
+        body: ALaunch(),
       ),
     );
   }
@@ -92,7 +87,6 @@ class ALaunch extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: const Color(0xFF232222),
-        border: Border.all(width: 1, color: Colors.white),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Stack(
