@@ -120,7 +120,7 @@ class _ActivityLevelState extends State<ActivityLevel> {
                         : () {
                       Navigator.pushNamed(
                         context,
-                        AppRoutes.activity,
+                        AppRoutes.profile,
                         arguments: _selected,
                       );
                     },

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:impal/views/Setup.dart';
 import 'package:impal/views/activity.dart';
+import 'package:impal/views/profile.dart';
 import 'package:impal/views/signup.dart';
 import '../views/launch.dart';
 import '../views/onboard.dart';
@@ -14,6 +15,7 @@ import '../views/old.dart';
 import '../views/height.dart';
 import '../views/weight.dart';
 import '../views/activity.dart';
+import '../views/profile.dart';
 
 class AppRoutes {
   static const String splash = '/';
@@ -29,6 +31,7 @@ class AppRoutes {
   static const String height = '/height';
   static const String weight = '/weight';
   static const String activity = '/activity';
+  static const String profile = '/profile';
 
 
 
@@ -45,7 +48,8 @@ class AppRoutes {
     old: (context) => const AHowOld(),
     height: (context) => const Height(),
     weight: (context) => const Weight(),
-    activity: (context) => const ActivityLevel()
+    activity: (context) => const ActivityLevel(),
+    profile: (context) => const Profile()
 
 
   };
