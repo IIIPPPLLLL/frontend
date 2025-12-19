@@ -63,8 +63,12 @@ flutter:
     - assets/images/logo-launch.png
     - assets/images/logo-onboard.png
     - assets/images/background-onboard.png
+    - assets/images/background-onboard3.png
     - assets/images/background-onboard2.png
     - assets/images/background-onboard4.png
+    - assets/images/google.png
+    - assets/images/fb.png
+    - assets/images/x.png
     #icons
     - assets/icons/
 

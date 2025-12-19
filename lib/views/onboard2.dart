@@ -114,9 +114,9 @@ class BOnBoarding extends StatelessWidget {
                   height: 23,
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.pushReplacementNamed(
+                      Navigator.pushNamed(
                         context,
-                        AppRoutes.onboard4,
+                        AppRoutes.onboard3,
                       );
                     },
                     style: ElevatedButton.styleFrom(
@@ -162,9 +162,9 @@ class BOnBoarding extends StatelessWidget {
             top: 65,
             child: GestureDetector(
               onTap: () {
-                Navigator.pushReplacementNamed(
+                Navigator.pushNamed(
                   context,
-                  AppRoutes.onboard2,
+                  AppRoutes.login,
                 );
               },
               child: Row(
