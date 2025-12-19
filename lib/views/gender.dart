@@ -175,7 +175,7 @@ class _GenderAState extends State<GenderA> {
                         : () {
                       Navigator.pushNamed(
                         context,
-                        AppRoutes.gender,
+                        AppRoutes.old,
                         arguments: selectedGender,
                       );
                     },

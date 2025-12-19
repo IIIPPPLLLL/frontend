@@ -9,6 +9,7 @@ import '../views/onboard3.dart';
 import '../views/login.dart';
 import '../views/signup.dart';
 import '../views/gender.dart';
+import '../views/old.dart';
 
 class AppRoutes {
   static const String splash = '/';
@@ -20,6 +21,8 @@ class AppRoutes {
   static const String signup = '/signup';
   static const String setup = '/setup';
   static const String gender = '/gender';
+  static const String old = '/old';
+
 
 
   static final Map<String, WidgetBuilder> routes = {
@@ -31,6 +34,8 @@ class AppRoutes {
     login: (context) => const ALogIn(),
     signup: (context) => const BSignUp(),
     setup : (context) => const ASetUp(),
-    gender: (context) => const GenderA()
+    gender: (context) => const GenderA(),
+    old: (context) => const AHowOld()
+
   };
 }
