@@ -112,7 +112,7 @@ class COnBoarding extends StatelessWidget {
                 child: TextButton(
                   onPressed: () {
                     // ganti ini ke route tujuan kamu (misal login)
-                    Navigator.pushReplacementNamed(context, AppRoutes.onboard3);
+                    Navigator.pushReplacementNamed(context, AppRoutes.login);
                   },
                   style: TextButton.styleFrom(
                     foregroundColor: Colors.white,
