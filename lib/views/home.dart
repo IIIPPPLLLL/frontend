@@ -457,7 +457,7 @@ class _HomeState extends State<Home> {
                 right: w(35),
                 top: h(160),
                 child: GestureDetector(
-                  onTap: () => Navigator.pushNamed(context, AppRoutes.home),
+                  onTap: () => Navigator.pushNamed(context, AppRoutes.recomend),
                   child: Row(
                     children: [
                       Text(

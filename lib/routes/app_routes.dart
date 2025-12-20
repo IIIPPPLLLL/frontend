@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:impal/views/Setup.dart';
 import 'package:impal/views/activity.dart';
 import 'package:impal/views/profile.dart';
+import 'package:impal/views/recomend.dart';
 import 'package:impal/views/signup.dart';
 import '../views/launch.dart';
 import '../views/onboard.dart';
@@ -18,6 +19,7 @@ import '../views/activity.dart';
 import '../views/profile.dart';
 import '../views/goal.dart';
 import '../views/home.dart';
+import '../views/recomend.dart';
 
 class AppRoutes {
   static const String splash = '/';
@@ -36,6 +38,7 @@ class AppRoutes {
   static const String profile = '/profile';
   static const String goal = '/goal';
   static const String home = '/home';
+  static const String recomend = '/recomend';
 
 
 
@@ -55,8 +58,8 @@ class AppRoutes {
     activity: (context) => const ActivityLevel(),
     profile: (context) => const Profile(),
     goal: (context) => const Goal(),
-    home: (context) => const Home()
-
+    home: (context) => const Home(),
+    recomend: (context) => const Rekomendasi()
 
   };
 }

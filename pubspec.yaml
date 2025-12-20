@@ -74,7 +74,11 @@ flutter:
     - assets/images/breakfast.png
     - assets/images/salad.png
     - assets/images/squat.png
-    - assets/images/woman-gym.png
+    - assets/images/kebab.png
+    - assets/images/rempah.png
+    - assets/images/woman-stretch.png
+    - assets/images/push.png
+    - assets/images/salad2.png
     #icons
     - assets/icons/
 
