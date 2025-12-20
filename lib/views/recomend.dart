@@ -61,7 +61,7 @@ class Rekomendasi extends StatelessWidget {
 
               // Exercises label
               Positioned(
-                left: w(38),
+                left: w(40),
                 top: h(75),
                 child: Text(
                   'Exercises',
@@ -76,8 +76,8 @@ class Rekomendasi extends StatelessWidget {
 
               // Meal label
               Positioned(
-                left: w(34),
-                top: h(293),
+                left: w(40),
+                top: h(230),
                 child: Text(
                   'Meal',
                   style: TextStyle(
@@ -91,8 +91,8 @@ class Rekomendasi extends StatelessWidget {
 
               // Articles label
               Positioned(
-                left: w(32),
-                top: h(463),
+                left: w(40),
+                top: h(400),
                 child: Text(
                   'Articles',
                   style: TextStyle(
@@ -106,8 +106,8 @@ class Rekomendasi extends StatelessWidget {
 
               // Program label
               Positioned(
-                left: w(32),
-                top: h(623),
+                left: w(40),
+                top: h(560),
                 child: Text(
                   'Program',
                   style: TextStyle(
@@ -200,7 +200,7 @@ class Rekomendasi extends StatelessWidget {
               // ===== MEAL CARD =====
               Positioned(
                 left: w(32),
-                top: h(334),
+                top: h(250),
                 child: Container(
                   width: w(343),
                   height: h(110),
@@ -212,7 +212,7 @@ class Rekomendasi extends StatelessWidget {
               ),
               Positioned(
                 left: w(53.24),
-                top: h(361),
+                top: h(260),
                 child: SizedBox(
                   width: w(144.42),
                   child: Text(
@@ -229,7 +229,7 @@ class Rekomendasi extends StatelessWidget {
               ),
               Positioned(
                 left: w(68.11),
-                top: h(405),
+                top: h(320),
                 child: SizedBox(
                   width: w(53.10),
                   child: Text(
@@ -245,7 +245,7 @@ class Rekomendasi extends StatelessWidget {
               ),
               Positioned(
                 left: w(146.69),
-                top: h(405.45),
+                top: h(320),
                 child: SizedBox(
                   width: w(41.41),
                   child: Text(
@@ -261,7 +261,7 @@ class Rekomendasi extends StatelessWidget {
               ),
               Positioned(
                 left: w(217.84),
-                top: h(334),
+                top: h(250),
                 child: Container(
                   width: w(157.16),
                   height: h(110),
@@ -278,7 +278,7 @@ class Rekomendasi extends StatelessWidget {
               // ===== ARTICLES GRID =====
               Positioned(
                 left: w(36),
-                top: h(483),
+                top: h(420),
                 child: Container(
                   width: w(153),
                   height: h(95),
@@ -293,7 +293,7 @@ class Rekomendasi extends StatelessWidget {
               ),
               Positioned(
                 left: w(219),
-                top: h(483),
+                top: h(420),
                 child: Container(
                   width: w(156),
                   height: h(98),
@@ -308,7 +308,7 @@ class Rekomendasi extends StatelessWidget {
               ),
               Positioned(
                 left: w(39),
-                top: h(584),
+                top: h(520),
                 child: SizedBox(
                   width: w(145),
                   child: Text(
@@ -323,8 +323,8 @@ class Rekomendasi extends StatelessWidget {
                 ),
               ),
               Positioned(
-                left: w(220),
-                top: h(592),
+                left: w(230),
+                top: h(520),
                 child: SizedBox(
                   width: w(159),
                   child: Text(
@@ -342,7 +342,7 @@ class Rekomendasi extends StatelessWidget {
               // ===== PROGRAM CARD =====
               Positioned(
                 left: w(27),
-                top: h(660),
+                top: h(590),
                 child: Container(
                   width: w(344.80),
                   height: h(110),
@@ -354,7 +354,7 @@ class Rekomendasi extends StatelessWidget {
               ),
               Positioned(
                 left: w(46.21),
-                top: h(688),
+                top: h(630),
                 child: SizedBox(
                   width: w(145.18),
                   child: Text(
@@ -371,7 +371,7 @@ class Rekomendasi extends StatelessWidget {
               ),
               Positioned(
                 left: w(208.47),
-                top: h(659),
+                top: h(589),
                 child: Container(
                   width: w(166.53),
                   height: h(114),
@@ -398,45 +398,61 @@ class Rekomendasi extends StatelessWidget {
                     children: [
                       // ✅ 4 placeholder icon (ganti manual)
                       // HOME
-                      SvgPicture.asset(
-                      'assets/icons/logo-home2.svg',
-                      width: w(25),
-                      height: w(25),
-                      colorFilter: const ColorFilter.mode(
-                        Colors.white,
-                        BlendMode.srcIn,
-                      )),
-                      // DOC
-                      SvgPicture.asset(
+                      GestureDetector(
+                        onTap: (){
+                          Navigator.pushNamed(context, AppRoutes.recomend);
+                        },
+                          child: SvgPicture.asset(
+                              'assets/icons/logo-home2.svg',
+                              width: w(25),
+                              height: w(25),
+                              colorFilter: const ColorFilter.mode(
+                                Colors.white,
+                                BlendMode.srcIn,
+                              ))
+                      ),
+                      GestureDetector(
+                        onTap: (){
+                          Navigator.pushNamed(context, AppRoutes.recomend);
+                        },
+                        child:SvgPicture.asset(
                         'assets/icons/icon-doc.svg',
                         width: w(25),
                         height: w(25),
                         colorFilter: const ColorFilter.mode(
                           Colors.white,
                           BlendMode.srcIn,
-                        ),
+                        ))
+                      ),
+                      // DOC
+                      GestureDetector(
+                          onTap: (){
+                            Navigator.pushNamed(context, AppRoutes.recomend);
+                          },
+                          child:SvgPicture.asset(
+                              'assets/icons/logo-star.svg',
+                              width: w(25),
+                              height: w(25),
+                              colorFilter: const ColorFilter.mode(
+                                Colors.white,
+                                BlendMode.srcIn,
+                              ))
                       ),
                       // STAR
-                      SvgPicture.asset(
-                        'assets/icons/logo-star.svg',
-                        width: w(25),
-                        height: w(25),
-                        colorFilter: const ColorFilter.mode(
-                          Colors.white,
-                          BlendMode.srcIn,
-                        ),
-                      ),
                       // PROFILE
-                      SvgPicture.asset(
-                        'assets/icons/logo-profile2.svg',
-                        width: w(25),
-                        height: w(25),
-                        colorFilter: const ColorFilter.mode(
-                          Colors.white,
-                          BlendMode.srcIn,
-                        ),
+                      GestureDetector(
+                          onTap: (){
+                            Navigator.pushNamed(context, AppRoutes.recomend);
+                          },
+                          child:SvgPicture.asset(
+                              'assets/icons/logo-profile2.svg',
+                              width: w(25),
+                              height: w(25),
+                              colorFilter: const ColorFilter.mode(
+                                Colors.white,
+                                BlendMode.srcIn,
+                              ))
                       ),
-
                     ],
                   ),
                 ),
