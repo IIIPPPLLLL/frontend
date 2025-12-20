@@ -1,9 +1,77 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../routes/app_routes.dart';
+import '../service/api_service.dart';
 
-class ALogIn extends StatelessWidget {
+class ALogIn extends StatefulWidget {
   const ALogIn({super.key});
+
+  @override
+  State<ALogIn> createState() => _ALogInState();
+}
+
+class _ALogInState extends State<ALogIn> {
+  final TextEditingController identifierController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  Future<void> handleLogin() async {
+    final identifier = identifierController.text.trim();
+    final password = passwordController.text.trim();
+
+    if (identifier.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Username dan password wajib diisi')),
+      );
+      return;
+    }
+
+    try {
+      final response = await ApiService.login(identifier, password);
+
+      // ✅ CUKUP CEK HTTP STATUS
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              data['message'] ?? 'Login berhasil',
+            ),
+          ),
+        );
+
+        // ✅ PINDAH HALAMAN
+        Navigator.pushReplacementNamed(context, AppRoutes.setup);
+      } else if (response.statusCode == 401) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Username / password salah'),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Server error (${response.statusCode})'),
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: $e'),
+        ),
+      );
+    }
+  }
+
+
+  @override
+  void dispose() {
+    identifierController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,10 +102,10 @@ class ALogIn extends StatelessWidget {
                 ),
 
                 // Title
-                Text(
+                const Text(
                   'Log In',
                   style: TextStyle(
-                    color: const Color(0xFFE2F163),
+                    color: Color(0xFFE2F163),
                     fontSize: 20,
                     fontFamily: 'Poppins',
                     fontWeight: FontWeight.w700,
@@ -47,7 +115,7 @@ class ALogIn extends StatelessWidget {
                 const SizedBox(height: 40),
 
                 // Welcome Text
-                Text(
+                const Text(
                   'Welcome to HealthyLife',
                   style: TextStyle(
                     color: Colors.white,
@@ -60,7 +128,7 @@ class ALogIn extends StatelessWidget {
                 const SizedBox(height: 20),
 
                 // Description
-                Text(
+                const Text(
                   'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
@@ -74,12 +142,12 @@ class ALogIn extends StatelessWidget {
 
                 const SizedBox(height: 40),
 
-                // Username/Email Field
+                // Username
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Username or email',
+                    const Text(
+                      'Username',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 18,
@@ -96,13 +164,14 @@ class ALogIn extends StatelessWidget {
                         border: Border.all(color: Colors.white),
                       ),
                       child: TextField(
+                        controller: identifierController,
                         decoration: InputDecoration(
                           border: InputBorder.none,
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 15,
                             vertical: 12,
                           ),
-                          hintText: 'example@example.com',
+                          hintText: 'example',
                           hintStyle: TextStyle(
                             color: const Color(0xFF232222).withOpacity(0.7),
                             fontSize: 16,
@@ -110,8 +179,8 @@ class ALogIn extends StatelessWidget {
                             fontWeight: FontWeight.w400,
                           ),
                         ),
-                        style: TextStyle(
-                          color: const Color(0xFF232222),
+                        style: const TextStyle(
+                          color: Color(0xFF232222),
                           fontSize: 16,
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w400,
@@ -123,11 +192,11 @@ class ALogIn extends StatelessWidget {
 
                 const SizedBox(height: 25),
 
-                // Password Field
+                // Password
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Password',
                       style: TextStyle(
                         color: Colors.white,
@@ -145,6 +214,7 @@ class ALogIn extends StatelessWidget {
                         border: Border.all(color: Colors.white),
                       ),
                       child: TextField(
+                        controller: passwordController,
                         obscureText: true,
                         decoration: InputDecoration(
                           border: InputBorder.none,
@@ -161,8 +231,8 @@ class ALogIn extends StatelessWidget {
                             letterSpacing: 3.68,
                           ),
                         ),
-                        style: TextStyle(
-                          color: const Color(0xFF232222),
+                        style: const TextStyle(
+                          color: Color(0xFF232222),
                           fontSize: 16,
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w400,
@@ -173,15 +243,14 @@ class ALogIn extends StatelessWidget {
                   ],
                 ),
 
-                // Forgot Password
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () {},
-                    child: Text(
+                    child: const Text(
                       'Forgot Password?',
                       style: TextStyle(
-                        color: const Color(0xFF232222),
+                        color: Color(0xFF232222),
                         fontSize: 12,
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.w500,
@@ -197,9 +266,7 @@ class ALogIn extends StatelessWidget {
                   width: 200,
                   height: 44,
                   child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, AppRoutes.setup);
-                    },
+                    onPressed: handleLogin,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,
                       foregroundColor: Colors.white,
@@ -212,119 +279,21 @@ class ALogIn extends StatelessWidget {
                       ),
                       elevation: 0,
                     ),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0),
-                        borderRadius: BorderRadius.circular(200),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          'Log In',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w700,
-                          ),
+                    child: const Center(
+                      child: Text(
+                        'Log In',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
                   ),
                 ),
 
-                const SizedBox(height: 40),
-
-                // Divider with text
-                Row(
-                  children: [
-                    Expanded(
-                      child: Divider(
-                        color: Colors.white.withOpacity(0.5),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: Text(
-                        'or sign up with',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontFamily: 'League Spartan',
-                          fontWeight: FontWeight.w300,
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Divider(
-                        color: Colors.white.withOpacity(0.5),
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 20),
-
-                // Social Login Buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Facebook
-                    Container(
-                      width: 34,
-                      height: 34,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(13),
-                      ),
-                      child: Center(
-                        child: Image.asset(
-                          'assets/images/google.png',
-                          width: 21,
-                          height: 20,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 20),
-
-                    // X (Twitter)
-                    Container(
-                      width: 34,
-                      height: 34,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(13),
-                      ),
-                      child: Center(
-                        child: Image.asset(
-                          'assets/images/fb.png',
-                          width: 27,
-                          height: 25,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 20),
-
-                    // Google
-                    Container(
-                      width: 34,
-                      height: 34,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(13),
-                      ),
-                      child: Center(
-                        child: Image.asset(
-                          'assets/images/x.png',
-                          width: 20,
-                          height: 20,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-
                 const Spacer(),
 
-                // Sign Up Link
                 Padding(
                   padding: const EdgeInsets.only(bottom: 40),
                   child: Text.rich(
@@ -342,12 +311,15 @@ class ALogIn extends StatelessWidget {
                         WidgetSpan(
                           child: GestureDetector(
                             onTap: () {
-                              Navigator.pushNamed(context, AppRoutes.signup);
+                              Navigator.pushNamed(
+                                context,
+                                AppRoutes.signup,
+                              );
                             },
-                            child: Text(
+                            child: const Text(
                               'Sign Up',
                               style: TextStyle(
-                                color: const Color(0xFFE2F163),
+                                color: Color(0xFFE2F163),
                                 fontSize: 14,
                                 fontFamily: 'League Spartan',
                                 fontWeight: FontWeight.w300,

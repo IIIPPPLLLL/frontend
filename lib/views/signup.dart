@@ -1,9 +1,93 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../routes/app_routes.dart';
+import '../service/api_service.dart';
 
-class BSignUp extends StatelessWidget {
+class BSignUp extends StatefulWidget {
   const BSignUp({super.key});
+
+  @override
+  State<BSignUp> createState() => _BSignUpState();
+}
+
+class _BSignUpState extends State<BSignUp> {
+  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
+
+  Future<void> handleRegister() async {
+    final username = usernameController.text.trim();
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
+    final confirmPassword = confirmPasswordController.text.trim();
+
+    if (username.isEmpty ||
+        email.isEmpty ||
+        password.isEmpty ||
+        confirmPassword.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Semua field wajib diisi')),
+      );
+      return;
+    }
+
+    if (password != confirmPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Password tidak sama')),
+      );
+      return;
+    }
+
+    try {
+      final response = await ApiService.register(
+        username,
+        email,
+        password,
+      );
+
+      // ✅ CUKUP CEK HTTP STATUS
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              data['message'] ?? 'Register berhasil',
+            ),
+          ),
+        );
+
+        // ✅ LANGSUNG PINDAH KE LOGIN
+        Navigator.pushReplacementNamed(context, AppRoutes.login);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Register gagal (${response.statusCode})',
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: $e'),
+        ),
+      );
+    }
+  }
+
+
+  @override
+  void dispose() {
+    usernameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,11 +120,10 @@ class BSignUp extends StatelessWidget {
                     ),
                   ),
 
-                  // Title
-                  Text(
+                  const Text(
                     'Create Account',
                     style: TextStyle(
-                      color: const Color(0xFFE2F163),
+                      color: Color(0xFFE2F163),
                       fontSize: 20,
                       fontFamily: 'Poppins',
                       fontWeight: FontWeight.w700,
@@ -49,8 +132,7 @@ class BSignUp extends StatelessWidget {
 
                   const SizedBox(height: 20),
 
-                  // Subtitle
-                  Text(
+                  const Text(
                     "Let's start! Your Journey",
                     style: TextStyle(
                       color: Colors.white,
@@ -62,12 +144,13 @@ class BSignUp extends StatelessWidget {
 
                   const SizedBox(height: 40),
 
-                  // Email Field
+
+                  //Username
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Username or email',
+                      const Text(
+                        'Username',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 18,
@@ -81,9 +164,58 @@ class BSignUp extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(15),
-                          border: Border.all(color: Colors.white),
                         ),
                         child: TextField(
+                          controller: usernameController,
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 15,
+                              vertical: 12,
+                            ),
+                            hintText: 'example',
+                            hintStyle: TextStyle(
+                              color: const Color(0xFF232222).withOpacity(0.7),
+                              fontSize: 16,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                          style: const TextStyle(
+                            color: Color(0xFF232222),
+                            fontSize: 16,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 25),
+
+                  // Email
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Email',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontFamily: 'League Spartan',
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Container(
+                        height: 45,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: TextField(
+                          controller: emailController,
                           decoration: InputDecoration(
                             border: InputBorder.none,
                             contentPadding: const EdgeInsets.symmetric(
@@ -98,8 +230,8 @@ class BSignUp extends StatelessWidget {
                               fontWeight: FontWeight.w400,
                             ),
                           ),
-                          style: TextStyle(
-                            color: const Color(0xFF232222),
+                          style: const TextStyle(
+                            color: Color(0xFF232222),
                             fontSize: 16,
                             fontFamily: 'Poppins',
                             fontWeight: FontWeight.w400,
@@ -108,13 +240,14 @@ class BSignUp extends StatelessWidget {
                       ),
                     ],
                   ),
+
                   const SizedBox(height: 25),
 
-                  // Password Field
+                  // Password
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
                         'Password',
                         style: TextStyle(
                           color: Colors.white,
@@ -129,9 +262,9 @@ class BSignUp extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(15),
-                          border: Border.all(color: Colors.white),
                         ),
                         child: TextField(
+                          controller: passwordController,
                           obscureText: true,
                           decoration: InputDecoration(
                             border: InputBorder.none,
@@ -145,27 +278,26 @@ class BSignUp extends StatelessWidget {
                               fontSize: 16,
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w400,
-                              letterSpacing: 3.68,
                             ),
                           ),
-                          style: TextStyle(
-                            color: const Color(0xFF232222),
+                          style: const TextStyle(
+                            color: Color(0xFF232222),
                             fontSize: 16,
                             fontFamily: 'Poppins',
                             fontWeight: FontWeight.w400,
-                            letterSpacing: 3.68,
                           ),
                         ),
                       ),
                     ],
                   ),
+
                   const SizedBox(height: 25),
 
-                  // Confirm Password Field
+                  // Confirm Password
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
                         'Confirm Password',
                         style: TextStyle(
                           color: Colors.white,
@@ -180,9 +312,9 @@ class BSignUp extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(15),
-                          border: Border.all(color: Colors.white),
                         ),
                         child: TextField(
+                          controller: confirmPasswordController,
                           obscureText: true,
                           decoration: InputDecoration(
                             border: InputBorder.none,
@@ -196,68 +328,17 @@ class BSignUp extends StatelessWidget {
                               fontSize: 16,
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w400,
-                              letterSpacing: 3.68,
                             ),
                           ),
-                          style: TextStyle(
-                            color: const Color(0xFF232222),
+                          style: const TextStyle(
+                            color: Color(0xFF232222),
                             fontSize: 16,
                             fontFamily: 'Poppins',
                             fontWeight: FontWeight.w400,
-                            letterSpacing: 3.68,
                           ),
                         ),
                       ),
                     ],
-                  ),
-                  const SizedBox(height: 25),
-
-                  // Terms and Privacy
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    child: Text.rich(
-                      TextSpan(
-                        children: [
-                          TextSpan(
-                            text: 'By continuing, you agree to \n',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 13,
-                              fontFamily: 'League Spartan',
-                              fontWeight: FontWeight.w300,
-                            ),
-                          ),
-                          TextSpan(
-                            text: 'Terms of Use',
-                            style: TextStyle(
-                              color: Color(0xFFE2F163),
-                              fontSize: 13,
-                              fontFamily: 'League Spartan',
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          TextSpan(
-                            text: ' and ',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 13,
-                              fontFamily: 'League Spartan',
-                              fontWeight: FontWeight.w300,
-                            ),
-                          ),
-                          TextSpan(
-                            text: 'Privacy Policy.',
-                            style: TextStyle(
-                              color: Color(0xFFE2F163),
-                              fontSize: 13,
-                              fontFamily: 'League Spartan',
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
                   ),
 
                   const SizedBox(height: 30),
@@ -266,131 +347,29 @@ class BSignUp extends StatelessWidget {
                   SizedBox(
                     width: 180,
                     height: 44,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.09),
-                        borderRadius: BorderRadius.circular(100),
-                        border: Border.all(
-                          width: 0.50,
-                          color: Colors.white,
+                    child: TextButton(
+                      onPressed: handleRegister,
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: Colors.white.withOpacity(0.09),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(100),
+                          side: const BorderSide(color: Colors.white),
                         ),
                       ),
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.pushReplacementNamed(context, AppRoutes.login);
-                        },
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(100),
-                          ),
-                        ),
-                        child: const Text(
-                          'Sign Up',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w700,
-                          ),
+                      child: const Text(
+                        'Sign Up',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
                   ),
 
-                  const SizedBox(height: 40),
-
-                  // Divider with text
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Divider(
-                          color: Colors.white.withOpacity(0.5),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: Text(
-                          'or sign up with',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontFamily: 'League Spartan',
-                            fontWeight: FontWeight.w300,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Divider(
-                          color: Colors.white.withOpacity(0.5),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // Social Login Buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Google
-                      Container(
-                        width: 34,
-                        height: 34,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(13),
-                        ),
-                        child: Center(
-                          child: Image.asset(
-                            'assets/images/google.png',
-                            width: 21,
-                            height: 20,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 20),
-
-                      // Facebook
-                      Container(
-                        width: 34,
-                        height: 34,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(13),
-                        ),
-                        child: Center(
-                          child: Image.asset(
-                            'assets/images/fb.png',
-                            width: 27,
-                            height: 25,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 20),
-
-                      // X (Twitter)
-                      Container(
-                        width: 34,
-                        height: 34,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(13),
-                        ),
-                        child: Center(
-                          child: Image.asset(
-                            'assets/images/x.png',
-                            width: 20,
-                            height: 20,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
                   const Spacer(),
 
-                  // Login Link
                   Padding(
                     padding: const EdgeInsets.only(bottom: 40),
                     child: Text.rich(
@@ -408,12 +387,15 @@ class BSignUp extends StatelessWidget {
                           WidgetSpan(
                             child: GestureDetector(
                               onTap: () {
-                                Navigator.pushReplacementNamed(context, AppRoutes.login);
+                                Navigator.pushReplacementNamed(
+                                  context,
+                                  AppRoutes.login,
+                                );
                               },
-                              child: Text(
+                              child: const Text(
                                 'Log in',
                                 style: TextStyle(
-                                  color: const Color(0xFFE2F163),
+                                  color: Color(0xFFE2F163),
                                   fontSize: 14,
                                   fontFamily: 'League Spartan',
                                   fontWeight: FontWeight.w300,
