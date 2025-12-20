@@ -88,7 +88,7 @@ class _HomeState extends State<Home> {
     }) {
       return Positioned(
         left: w(left),
-        top: h(170),
+        top: h(185),
         child: GestureDetector(
           onTap: onTap,
           child: Container(
@@ -440,7 +440,7 @@ class _HomeState extends State<Home> {
               // Recommendations header
               Positioned(
                 left: w(38),
-                top: h(200),
+                top: h(155),
                 child: Text(
                   'Recommendations',
                   style: TextStyle(
@@ -455,7 +455,7 @@ class _HomeState extends State<Home> {
               // See All + arrow
               Positioned(
                 right: w(35),
-                top: h(203),
+                top: h(160),
                 child: GestureDetector(
                   onTap: () => Navigator.pushNamed(context, AppRoutes.home),
                   child: Row(
@@ -471,7 +471,7 @@ class _HomeState extends State<Home> {
                       ),
                       SizedBox(width: w(8)),
                       svgPlaceholder(
-                        assetPath: 'assets/icons/icon-doc.svg',
+                        assetPath: 'assets/icons/icon-play.svg',
                         width: w(14),
                         height: w(14),
                         color: Colors.white,
