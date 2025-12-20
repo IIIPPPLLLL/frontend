@@ -400,7 +400,7 @@ class Rekomendasi extends StatelessWidget {
                       // HOME
                       GestureDetector(
                         onTap: (){
-                          Navigator.pushNamed(context, AppRoutes.recomend);
+                          Navigator.pushNamed(context, AppRoutes.eat1);
                         },
                           child: SvgPicture.asset(
                               'assets/icons/logo-home2.svg',

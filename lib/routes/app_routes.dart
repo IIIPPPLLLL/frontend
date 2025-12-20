@@ -20,6 +20,7 @@ import '../views/profile.dart';
 import '../views/goal.dart';
 import '../views/home.dart';
 import '../views/recomend.dart';
+import '../views/eat1.dart';
 
 class AppRoutes {
   static const String splash = '/';
@@ -39,6 +40,7 @@ class AppRoutes {
   static const String goal = '/goal';
   static const String home = '/home';
   static const String recomend = '/recomend';
+  static const String eat1 = '/eat1';
 
 
 
@@ -59,7 +61,8 @@ class AppRoutes {
     profile: (context) => const Profile(),
     goal: (context) => const Goal(),
     home: (context) => const Home(),
-    recomend: (context) => const Rekomendasi()
+    recomend: (context) => const Rekomendasi(),
+    eat1: (context) => EatSchedule()
 
   };
 }
