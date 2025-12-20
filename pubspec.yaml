@@ -70,6 +70,11 @@ flutter:
     - assets/images/fb.png
     - assets/images/x.png
     - assets/images/background-setup.png
+    - assets/images/chicken.png
+    - assets/images/breakfast.png
+    - assets/images/salad.png
+    - assets/images/squat.png
+    - assets/images/woman-gym.png
     #icons
     - assets/icons/
 

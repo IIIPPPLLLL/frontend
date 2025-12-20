@@ -17,6 +17,7 @@ import '../views/weight.dart';
 import '../views/activity.dart';
 import '../views/profile.dart';
 import '../views/goal.dart';
+import '../views/home.dart';
 
 class AppRoutes {
   static const String splash = '/';
@@ -34,6 +35,7 @@ class AppRoutes {
   static const String activity = '/activity';
   static const String profile = '/profile';
   static const String goal = '/goal';
+  static const String home = '/home';
 
 
 
@@ -52,7 +54,8 @@ class AppRoutes {
     weight: (context) => const Weight(),
     activity: (context) => const ActivityLevel(),
     profile: (context) => const Profile(),
-    goal: (context) => const Goal()
+    goal: (context) => const Goal(),
+    home: (context) => const Home()
 
 
   };

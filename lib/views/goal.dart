@@ -123,7 +123,7 @@ class _GoalState extends State<Goal> {
                         : () {
                       Navigator.pushNamed(
                         context,
-                        AppRoutes.goal,
+                        AppRoutes.home,
                         arguments: _selected,
                       );
                     },
