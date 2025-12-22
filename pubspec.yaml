@@ -80,6 +80,16 @@ flutter:
     - assets/images/push.png
     - assets/images/salad2.png
     - assets/images/woman-gym.png
+    - assets/images/back-mealplans.png
+    - assets/images/yogurt.png
+    - assets/images/toast.png
+    - assets/images/omlet.png
+    - assets/images/fruits.png
+    - assets/images/toast2.png
+    - assets/images/nutri.png
+    - assets/images/fitness.png
+    - assets/images/recipe.png
+    - assets/images/jokowi.jpeg
     #icons
     - assets/icons/
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../routes/app_routes.dart';
 
 class Height extends StatefulWidget {
@@ -18,6 +19,120 @@ class _HeightState extends State<Height> {
     setState(() {
       _height = value.clamp(_minH, _maxH);
     });
+  }
+
+  Future<void> _showManualHeightInput() async {
+    final controller = TextEditingController(text: _height.toString());
+    String? errorText;
+
+    await showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setLocalState) {
+            void validate(String v) {
+              if (v.trim().isEmpty) {
+                setLocalState(() => errorText = "Height can't be empty");
+                return;
+              }
+              final parsed = int.tryParse(v);
+              if (parsed == null) {
+                setLocalState(() => errorText = "Please enter a valid number");
+                return;
+              }
+              if (parsed < _minH || parsed > _maxH) {
+                setLocalState(() => errorText = "Height must be between $_minH and $_maxH");
+                return;
+              }
+              setLocalState(() => errorText = null);
+            }
+
+            return AlertDialog(
+              backgroundColor: const Color(0xFF232222),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              title: const Text(
+                "Enter your height (cm)",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              content: TextField(
+                controller: controller,
+                keyboardType: TextInputType.number,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w600,
+                ),
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(3),
+                ],
+                decoration: InputDecoration(
+                  hintText: "e.g. 165",
+                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                  errorText: errorText,
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.white.withOpacity(0.35)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFFE2F163), width: 1.2),
+                  ),
+                ),
+                onChanged: validate,
+                onSubmitted: (v) {
+                  validate(v);
+                  if (errorText == null) {
+                    _setHeight(int.parse(v));
+                    Navigator.pop(ctx);
+                  }
+                },
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: Text(
+                    "Cancel",
+                    style: TextStyle(color: Colors.white.withOpacity(0.8)),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    final v = controller.text.trim();
+                    final parsed = int.tryParse(v);
+
+                    if (v.isEmpty) {
+                      setLocalState(() => errorText = "Height can't be empty");
+                      return;
+                    }
+                    if (parsed == null) {
+                      setLocalState(() => errorText = "Please enter a valid number");
+                      return;
+                    }
+                    if (parsed < _minH || parsed > _maxH) {
+                      setLocalState(() => errorText = "Height must be between $_minH and $_maxH");
+                      return;
+                    }
+
+                    _setHeight(parsed);
+                    Navigator.pop(ctx);
+                  },
+                  child: const Text(
+                    "OK",
+                    style: TextStyle(color: Color(0xFFE2F163), fontWeight: FontWeight.w700),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -76,35 +191,53 @@ class _HeightState extends State<Height> {
 
               const SizedBox(height: 50),
 
-              // Big height + unit
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    '$_height',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 64,
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w700,
+              // ✅ Big height + unit (tap = manual input)
+              GestureDetector(
+                onTap: _showManualHeightInput,
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          '$_height',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 64,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        const Opacity(
+                          opacity: 0.65,
+                          child: Text(
+                            'cm',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(width: 6),
-                  const Opacity(
-                    opacity: 0.65,
-                    child: Text(
-                      'cm',
+                    const SizedBox(height: 6),
+                    Text(
+                      'Tap to type',
                       style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
+                        color: Colors.white.withOpacity(0.55),
+                        fontSize: 12,
                         fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
+
 
               const SizedBox(height: 40),
 
