@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../routes/app_routes.dart';
 
 class AHowOld extends StatefulWidget {
@@ -19,6 +20,124 @@ class _AHowOldState extends State<AHowOld> {
   void _setAge(int value) {
     final v = value.clamp(_minAge, _maxAge);
     setState(() => _age = v);
+  }
+
+  Future<void> _showManualAgeInput() async {
+    final controller = TextEditingController(text: _age.toString());
+    String? errorText;
+
+    await showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setLocalState) {
+            void validate(String v) {
+              if (v.trim().isEmpty) {
+                setLocalState(() => errorText = "Age can't be empty");
+                return;
+              }
+              final parsed = int.tryParse(v);
+              if (parsed == null) {
+                setLocalState(() => errorText = "Please enter a valid number");
+                return;
+              }
+              if (parsed < _minAge || parsed > _maxAge) {
+                setLocalState(
+                      () => errorText = "Age must be between $_minAge and $_maxAge",
+                );
+                return;
+              }
+              setLocalState(() => errorText = null);
+            }
+
+            return AlertDialog(
+              backgroundColor: const Color(0xFF232222),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              title: const Text(
+                "Enter your age",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              content: TextField(
+                controller: controller,
+                keyboardType: TextInputType.number,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w600,
+                ),
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(3),
+                ],
+                decoration: InputDecoration(
+                  hintText: "e.g. 28",
+                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                  errorText: errorText,
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.white.withOpacity(0.35)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFFE2F163), width: 1.2),
+                  ),
+                ),
+                onChanged: validate,
+                onSubmitted: (v) {
+                  validate(v);
+                  if (errorText == null) {
+                    _setAge(int.parse(v));
+                    Navigator.pop(ctx);
+                  }
+                },
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: Text(
+                    "Cancel",
+                    style: TextStyle(color: Colors.white.withOpacity(0.8)),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    final v = controller.text.trim();
+                    final parsed = int.tryParse(v);
+
+                    if (v.isEmpty) {
+                      setLocalState(() => errorText = "Age can't be empty");
+                      return;
+                    }
+                    if (parsed == null) {
+                      setLocalState(() => errorText = "Please enter a valid number");
+                      return;
+                    }
+                    if (parsed < _minAge || parsed > _maxAge) {
+                      setLocalState(
+                            () => errorText = "Age must be between $_minAge and $_maxAge",
+                      );
+                      return;
+                    }
+
+                    _setAge(parsed);
+                    Navigator.pop(ctx);
+                  },
+                  child: const Text(
+                    "OK",
+                    style: TextStyle(color: Color(0xFFE2F163), fontWeight: FontWeight.w700),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -78,15 +197,32 @@ class _AHowOldState extends State<AHowOld> {
 
               const SizedBox(height: 70),
 
-              // Big Age
-              Text(
-                '$_age',
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 64,
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w700,
+              // ✅ Big Age (tap to input manual)
+              GestureDetector(
+                onTap: _showManualAgeInput,
+                child: Column(
+                  children: [
+                    Text(
+                      '$_age',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 64,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "Tap to type",
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.55),
+                        fontSize: 12,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
               ),
 
@@ -95,7 +231,7 @@ class _AHowOldState extends State<AHowOld> {
               // ✅ Swipe bar (geser kiri/kanan)
               GestureDetector(
                 onHorizontalDragUpdate: (details) {
-                  // swipe kanan -> age turun, swipe kiri -> age naik (feel natural bisa dibalik)
+                  // swipe kanan -> age turun, swipe kiri -> age naik
                   if (details.delta.dx > 6) {
                     _setAge(_age - 1);
                   } else if (details.delta.dx < -6) {
@@ -124,7 +260,7 @@ class _AHowOldState extends State<AHowOld> {
                             return Stack(
                               children: [
                                 Positioned(
-                                  left: center - 59, // ~118/2
+                                  left: center - 59,
                                   top: -10,
                                   bottom: -10,
                                   child: Container(
@@ -231,7 +367,6 @@ class _AHowOldState extends State<AHowOld> {
                   ),
                   child: TextButton(
                     onPressed: () {
-                      // kalau mau kirim age ke page berikut:
                       Navigator.pushNamed(
                         context,
                         AppRoutes.height,

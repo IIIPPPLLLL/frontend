@@ -130,11 +130,11 @@ class _ProfileState extends State<Profile> {
                 const SizedBox(height: 18),
 
                 const Text(
-                  'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+                  'Set up your profile and let’s get started. ',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 14,
+                    fontSize: 18,
                     fontFamily: 'League Spartan',
                     fontWeight: FontWeight.w300,
                     height: 1.2,
@@ -155,7 +155,7 @@ class _ProfileState extends State<Profile> {
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(200),
                         image: const DecorationImage(
-                          image: AssetImage('assets/images/background-onboard3.png'),
+                          image: AssetImage('assets/images/jokowi.jpeg'),
                           fit: BoxFit.cover,
                         ),
                       ),

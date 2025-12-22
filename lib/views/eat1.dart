@@ -34,7 +34,7 @@ class EatSchedule extends StatelessWidget {
                 child: Container(color: const Color(0xFF232222)),
               ),
 
-              // Back button
+              // Back button (SUDAH ADA)
               Positioned(
                 left: w(35),
                 top: h(62),
@@ -82,8 +82,8 @@ class EatSchedule extends StatelessWidget {
                   ),
                   child: Center(
                     child: Text(
-                      'Eat Schedule',
                       textAlign: TextAlign.center,
+                      'Eat Schedule',
                       style: TextStyle(
                         color: const Color(0xFF232222),
                         fontSize: w(17),
@@ -102,7 +102,7 @@ class EatSchedule extends StatelessWidget {
                 top: h(117),
                 child: GestureDetector(
                   onTap: () {
-                    Navigator.pushNamed(context, AppRoutes.eat1);
+                    Navigator.pushNamed(context, AppRoutes.eat2);
                   },
                   child: Container(
                     width: w(157),
@@ -460,7 +460,7 @@ class EatSchedule extends StatelessWidget {
               // Save Schedule Button
               Positioned(
                 left: w(106),
-                top: h(690),
+                top: h(630),
                 child: GestureDetector(
                   onTap: () {
                     // Aksi ketika tombol ditekan
@@ -482,7 +482,7 @@ class EatSchedule extends StatelessWidget {
                     // Navigate ke halaman success atau kembali
                     Navigator.pushNamed(
                       context,
-                      AppRoutes.eat1,
+                      AppRoutes.home,
                       arguments: scheduleData,
                     );
                   },

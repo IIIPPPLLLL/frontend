@@ -88,12 +88,12 @@ class _HomeState extends State<Home> {
     }) {
       return Positioned(
         left: w(left),
-        top: h(185),
+        top: h(top),
         child: GestureDetector(
           onTap: onTap,
           child: Container(
-            width: w(157),
-            height: h(144),
+            width: w(190),
+            height: h(156),
             decoration: BoxDecoration(
               border: Border.all(color: Colors.white, width: w(1)),
               borderRadius: BorderRadius.circular(w(16)),
@@ -173,47 +173,81 @@ class _HomeState extends State<Home> {
                 ),
 
                 // info row (minutes + kcal)
+                // info row (minutes + kcal) — FIX: anti overflow + rapi kaya figma
                 Positioned(
                   left: w(12),
+                  right: w(36), // ✅ kasih ruang supaya nggak tabrakan sama tombol play
                   bottom: h(12),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      svgPlaceholder(
-                        assetPath: 'assets/icons/ic_clock.svg',
-                        width: w(12),
-                        height: w(12),
-                        color: Colors.white,
-                      ),
-                      SizedBox(width: w(4)),
-                      Text(
-                        '12 Minutes',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: w(12),
-                          fontFamily: 'League Spartan',
-                          fontWeight: FontWeight.w300,
+                      // left group: clock + minutes
+                      Flexible(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            svgPlaceholder(
+                              assetPath: 'assets/icons/ic_clock.svg',
+                              width: w(12),
+                              height: w(12),
+                              color: Colors.white,
+                            ),
+                            SizedBox(width: w(4)),
+                            Flexible(
+                              child: Text(
+                                '12 Minutes',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: w(12),
+                                  fontFamily: 'League Spartan',
+                                  fontWeight: FontWeight.w300,
+                                  height: 1.1, // ✅ align baseline biar rapih
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
+
                       SizedBox(width: w(10)),
-                      svgPlaceholder(
-                        assetPath: 'assets/icons/ic_fire.svg',
-                        width: w(12),
-                        height: w(12),
-                        color: Colors.white,
-                      ),
-                      SizedBox(width: w(4)),
-                      Text(
-                        '120 Kcal',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: w(12),
-                          fontFamily: 'League Spartan',
-                          fontWeight: FontWeight.w300,
+
+                      // right group: fire + kcal
+                      Flexible(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            svgPlaceholder(
+                              assetPath: 'assets/icons/ic_fire.svg',
+                              width: w(12),
+                              height: w(12),
+                              color: Colors.white,
+                            ),
+                            SizedBox(width: w(4)),
+                            Flexible(
+                              child: Text(
+                                '120 Kcal',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.right,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: w(12),
+                                  fontFamily: 'League Spartan',
+                                  fontWeight: FontWeight.w300,
+                                  height: 1.1,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
                 ),
+
               ],
             ),
           ),
@@ -345,7 +379,7 @@ class _HomeState extends State<Home> {
                     ),
                     SizedBox(width: w(14)),
                     GestureDetector(
-                      onTap: () => Navigator.pushNamed(context, AppRoutes.home),
+                      onTap: () => Navigator.pushNamed(context, AppRoutes.notif),
                       child: svgPlaceholder(
                         assetPath: 'assets/icons/logo-notif.svg',
                         width: w(20),
@@ -367,17 +401,18 @@ class _HomeState extends State<Home> {
                 ),
               ),
 
-              // Progress tracking + Consultation
+              // Progress tracking + Consultation + New Feature (tanpa divider)
               Positioned(
                 left: w(35),
                 top: h(95),
                 child: SizedBox(
                   width: w(323),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly, // 🔥 auto rapi
                     children: [
+                      // ===== Progress Tracking =====
                       GestureDetector(
-                        onTap: () => Navigator.pushNamed(context, AppRoutes.home),
+                        onTap: () => Navigator.pushNamed(context, AppRoutes.tracking),
                         child: Column(
                           children: [
                             SvgPicture.asset(
@@ -401,15 +436,10 @@ class _HomeState extends State<Home> {
                           ],
                         ),
                       ),
-                      SizedBox(width: w(26)),
-                      Container(
-                        width: w(1),
-                        height: h(42),
-                        color: Colors.white.withOpacity(0.35),
-                      ),
-                      SizedBox(width: w(26)),
+
+                      // ===== Consultation =====
                       GestureDetector(
-                        onTap: () => Navigator.pushNamed(context, AppRoutes.home),
+                        onTap: () => Navigator.pushNamed(context, AppRoutes.consult),
                         child: Column(
                           children: [
                             SvgPicture.asset(
@@ -432,10 +462,41 @@ class _HomeState extends State<Home> {
                           ],
                         ),
                       ),
+
+                      // ===== NEW FEATURE (PLACEHOLDER) =====
+                      GestureDetector(
+                        onTap: () => Navigator.pushNamed(context, AppRoutes.meal),
+                        child: Column(
+                          children: [
+                            // 🔧 SVG placeholder (ganti asset nanti)
+                            SvgPicture.asset(
+                              'assets/icons/meal-menu.svg',
+                              width: w(26),
+                              height: w(26),
+                              color: Colors.white,
+                            ),
+                            SizedBox(height: h(6)),
+                            Text(
+                              'Meal\nPlans',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: w(12),
+                                fontFamily: 'League Spartan',
+                                fontWeight: FontWeight.w300,
+                                height: 1.0,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
               ),
+
+
+
 
               // Recommendations header
               Positioned(
@@ -483,8 +544,8 @@ class _HomeState extends State<Home> {
 
               // ✅ Recommendation cards (with star toggle)
               recommendationCard(
-                left: 35,
-                top: 229,
+                left: 5,
+                top: 185,
                 title: 'Squat Exercise',
                 imagePlaceholder: 'assets/images/squat.png',
                 isStarOn: _starRecLeft,
@@ -493,7 +554,7 @@ class _HomeState extends State<Home> {
               ),
               recommendationCard(
                 left: 201,
-                top: 229,
+                top: 185,
                 title: 'Blackened Chicken Avocado',
                 imagePlaceholder: 'assets/images/chicken.png',
                 isStarOn: _starRecRight,
@@ -504,7 +565,7 @@ class _HomeState extends State<Home> {
               // ✅ Today’s Schedule title (naik)
               Positioned(
                 left: w(38),
-                top: h(up(410)),
+                top: h(up(420)),
                 child: Text(
                   "Today’s Schedule",
                   style: TextStyle(
@@ -660,7 +721,7 @@ class _HomeState extends State<Home> {
                         ),
                       ),
                       GestureDetector(
-                        onTap: () => Navigator.pushNamed(context, AppRoutes.home),
+                        onTap: () => Navigator.pushNamed(context, AppRoutes.tracking),
                         child: svgPlaceholder(
                           assetPath: 'assets/icons/icon-doc.svg',
                           width: w(26),
