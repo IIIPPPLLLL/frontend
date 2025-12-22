@@ -49,6 +49,53 @@ class ApiService {
     );
   }
 
+  static Future<http.Response> age(
+      int age,
+      String token, // Tambahkan parameter token
+      ) {
+    return http.put(
+      Uri.parse('$baseUrl/user/age/update'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token', // Tambahkan header Authorization
+      },
+      body: jsonEncode({
+        'age': age,
+      }),
+    );
+  }
+
+  static Future<http.Response> height(
+      int height,
+      String token, // Tambahkan parameter token
+      ) {
+    return http.patch(
+      Uri.parse('$baseUrl/user/health/profile/add'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token', // Tambahkan header Authorization
+      },
+      body: jsonEncode({
+        'height': height,
+      }),
+    );
+  }
+
+  static Future<http.Response> weight(
+      int weight,
+      String token, // Tambahkan parameter token
+      ) {
+    return http.patch(
+      Uri.parse('$baseUrl/user/health/profile/add'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token', // Tambahkan header Authorization
+      },
+      body: jsonEncode({
+        'weight': weight,
+      }),
+    );
+  }
   // OPTIONAL: Method untuk cek apakah token valid
   static Future<http.Response> verifyToken(String token) {
     return http.get(
