@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:flutter/services.dart';
 import '../routes/app_routes.dart';
 import '../service/api_service.dart';
 
@@ -135,6 +136,120 @@ class _HeightState extends State<Height> {
     );
   }
 
+  Future<void> _showManualHeightInput() async {
+    final controller = TextEditingController(text: _height.toString());
+    String? errorText;
+
+    await showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setLocalState) {
+            void validate(String v) {
+              if (v.trim().isEmpty) {
+                setLocalState(() => errorText = "Height can't be empty");
+                return;
+              }
+              final parsed = int.tryParse(v);
+              if (parsed == null) {
+                setLocalState(() => errorText = "Please enter a valid number");
+                return;
+              }
+              if (parsed < _minH || parsed > _maxH) {
+                setLocalState(() => errorText = "Height must be between $_minH and $_maxH");
+                return;
+              }
+              setLocalState(() => errorText = null);
+            }
+
+            return AlertDialog(
+              backgroundColor: const Color(0xFF232222),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              title: const Text(
+                "Enter your height (cm)",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              content: TextField(
+                controller: controller,
+                keyboardType: TextInputType.number,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w600,
+                ),
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(3),
+                ],
+                decoration: InputDecoration(
+                  hintText: "e.g. 165",
+                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                  errorText: errorText,
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.white.withOpacity(0.35)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFFE2F163), width: 1.2),
+                  ),
+                ),
+                onChanged: validate,
+                onSubmitted: (v) {
+                  validate(v);
+                  if (errorText == null) {
+                    _setHeight(int.parse(v));
+                    Navigator.pop(ctx);
+                  }
+                },
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: Text(
+                    "Cancel",
+                    style: TextStyle(color: Colors.white.withOpacity(0.8)),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    final v = controller.text.trim();
+                    final parsed = int.tryParse(v);
+
+                    if (v.isEmpty) {
+                      setLocalState(() => errorText = "Height can't be empty");
+                      return;
+                    }
+                    if (parsed == null) {
+                      setLocalState(() => errorText = "Please enter a valid number");
+                      return;
+                    }
+                    if (parsed < _minH || parsed > _maxH) {
+                      setLocalState(() => errorText = "Height must be between $_minH and $_maxH");
+                      return;
+                    }
+
+                    _setHeight(parsed);
+                    Navigator.pop(ctx);
+                  },
+                  child: const Text(
+                    "OK",
+                    style: TextStyle(color: Color(0xFFE2F163), fontWeight: FontWeight.w700),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final int h1 = (_height + 10).clamp(_minH, _maxH); // atas jauh
@@ -180,7 +295,7 @@ class _HeightState extends State<Height> {
 
               // Title
               const Text(
-                'What Is Your Height?',
+                'What Is Your height?',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 25,
@@ -191,35 +306,53 @@ class _HeightState extends State<Height> {
 
               const SizedBox(height: 50),
 
-              // Big height + unit
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    '$_height',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 64,
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w700,
+              // ✅ Big height + unit (tap = manual input)
+              GestureDetector(
+                onTap: _showManualHeightInput,
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          '$_height',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 64,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        const Opacity(
+                          opacity: 0.65,
+                          child: Text(
+                            'cm',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(width: 6),
-                  const Opacity(
-                    opacity: 0.65,
-                    child: Text(
-                      'cm',
+                    const SizedBox(height: 6),
+                    Text(
+                      'Tap to type',
                       style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
+                        color: Colors.white.withOpacity(0.55),
+                        fontSize: 12,
                         fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
+
 
               const SizedBox(height: 40),
 
@@ -235,136 +368,133 @@ class _HeightState extends State<Height> {
                     _setHeight(_height - 1);
                   }
                 },
-                child: Opacity(
-                  opacity: _isLoading ? 0.6 : 1.0,
-                  child: SizedBox(
-                    height: 320,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Left numbers
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Opacity(
-                              opacity: 0.45,
-                              child: Text(
-                                '$h1',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 25,
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 18),
-                            Opacity(
-                              opacity: 0.65,
-                              child: Text(
-                                '$h2',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 35,
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 18),
-                            Text(
-                              '$h3',
+                child: SizedBox(
+                  height: 320,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Left numbers
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Opacity(
+                            opacity: 0.45,
+                            child: Text(
+                              '$h1',
                               style: const TextStyle(
                                 color: Colors.white,
-                                fontSize: 40,
+                                fontSize: 25,
                                 fontFamily: 'Poppins',
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
-                            const SizedBox(height: 18),
-                            Opacity(
-                              opacity: 0.65,
-                              child: Text(
-                                '$h4',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 35,
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w700,
+                          ),
+                          const SizedBox(height: 18),
+                          Opacity(
+                            opacity: 0.65,
+                            child: Text(
+                              '$h2',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 35,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 18),
+                          Text(
+                            '$h3',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 40,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 18),
+                          Opacity(
+                            opacity: 0.65,
+                            child: Text(
+                              '$h4',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 35,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 18),
+                          Opacity(
+                            opacity: 0.45,
+                            child: Text(
+                              '$h5',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 25,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(width: 18),
+
+                      // Middle green "ruler"
+                      Container(
+                        width: 70,
+                        height: 280,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF588D6E),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Stack(
+                          children: [
+                            // ticks (simple)
+                            Positioned.fill(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                  horizontal: 18,
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: List.generate(12, (i) {
+                                    final bool longTick = i % 3 == 0;
+                                    return Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Container(
+                                        width: longTick ? 34 : 22,
+                                        height: 2,
+                                        color: Colors.white.withOpacity(0.9),
+                                      ),
+                                    );
+                                  }),
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 18),
-                            Opacity(
-                              opacity: 0.45,
-                              child: Text(
-                                '$h5',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 25,
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w700,
+
+                            // highlight line (center)
+                            Align(
+                              alignment: Alignment.center,
+                              child: Container(
+                                width: 56,
+                                height: 0,
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    width: 3,
+                                    color: const Color(0xFFE2F163),
+                                  ),
                                 ),
                               ),
                             ),
                           ],
                         ),
-
-                        const SizedBox(width: 18),
-
-                        // Middle green "ruler"
-                        Container(
-                          width: 70,
-                          height: 280,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF588D6E),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Stack(
-                            children: [
-                              // ticks (simple)
-                              Positioned.fill(
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 16,
-                                    horizontal: 18,
-                                  ),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: List.generate(12, (i) {
-                                      final bool longTick = i % 3 == 0;
-                                      return Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: Container(
-                                          width: longTick ? 34 : 22,
-                                          height: 2,
-                                          color: Colors.white.withOpacity(0.9),
-                                        ),
-                                      );
-                                    }),
-                                  ),
-                                ),
-                              ),
-
-                              // highlight line (center)
-                              Align(
-                                alignment: Alignment.center,
-                                child: Container(
-                                  width: 56,
-                                  height: 0,
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                      width: 3,
-                                      color: const Color(0xFFE2F163),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),

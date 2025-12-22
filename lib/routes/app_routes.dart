@@ -5,6 +5,7 @@ import 'package:impal/views/profile.dart';
 import 'package:impal/views/recomend.dart';
 import 'package:impal/views/signup.dart';
 import '../views/launch.dart';
+import '../views/meal2.dart';
 import '../views/onboard.dart';
 import '../views/onboard2.dart';
 import '../views/onboard4.dart';
@@ -21,6 +22,16 @@ import '../views/goal.dart';
 import '../views/home.dart';
 import '../views/recomend.dart';
 import '../views/eat1.dart';
+import '../views/eat2.dart';
+import '../views/progressTracking.dart';
+import '../views/notif.dart';
+import '../views/workout.dart';
+import '../views/meal1.dart';
+import '../views/meal2.dart';
+import '../views/meal3.dart';
+import '../views/meal4.dart';
+import '../views/meal5.dart';
+import '../views/consult.dart';
 
 class AppRoutes {
   static const String splash = '/';
@@ -41,6 +52,18 @@ class AppRoutes {
   static const String home = '/home';
   static const String recomend = '/recomend';
   static const String eat1 = '/eat1';
+  static const String eat2 = '/eat2';
+  static const String tracking = '/progressTracking';
+  static const String notif = '/Notification';
+  static const String workout = '/WorkoutLogs';
+  static const String meal = '/MealPlans';
+  static const String meal2 = '/MealPlans2';
+  static const String meal3 = '/MealPlans3';
+  static const String meal4 = '/MealPlans4';
+  static const String meal5 = '/MealPlans5';
+  static const String consult = '/Consultation';
+
+
 
 
 
@@ -62,7 +85,16 @@ class AppRoutes {
     goal: (context) => const Goal(),
     home: (context) => const Home(),
     recomend: (context) => const Rekomendasi(),
-    eat1: (context) => EatSchedule()
-
+    eat1: (context) => EatSchedule(),
+    eat2: (context) => EatSchedule2(),
+    tracking: (context) => ProgressTracking(),
+    notif: (context) => Notification1(),
+    workout: (context) => WorkoutLogs(),
+    meal: (context) => MealPlans(),
+    meal2: (context) => MealPlans2(),
+    meal3: (context) => MealPlans3(),
+    meal4: (context) => MealPlans4(),
+    meal5: (context) => MealPlans5(),
+    consult: (context) => Consultation()
   };
 }

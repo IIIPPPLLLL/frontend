@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../routes/app_routes.dart';
 
 class Weight extends StatefulWidget {
@@ -42,6 +43,138 @@ class _WeightState extends State<Weight> {
     } else if (details.delta.dx > 6) {
       _setKg(_weightKg - 1);
     }
+  }
+
+  // ✅ manual input (tap to type)
+  Future<void> _showManualWeightInput() async {
+    final bool isKgNow = _isKg;
+
+    // range display tergantung unit
+    final int minDisplay = isKgNow ? _minKg : _toLb(_minKg);
+    final int maxDisplay = isKgNow ? _maxKg : _toLb(_maxKg);
+
+    final int currentDisplay = isKgNow ? _weightKg : _weightLb;
+
+    final controller = TextEditingController(text: currentDisplay.toString());
+    String? errorText;
+
+    await showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setLocalState) {
+            void validate(String v) {
+              if (v.trim().isEmpty) {
+                setLocalState(() => errorText = "Weight can't be empty");
+                return;
+              }
+              final parsed = int.tryParse(v);
+              if (parsed == null) {
+                setLocalState(() => errorText = "Please enter a valid number");
+                return;
+              }
+              if (parsed < minDisplay || parsed > maxDisplay) {
+                setLocalState(
+                      () => errorText =
+                  "Weight must be between $minDisplay and $maxDisplay ${isKgNow ? 'kg' : 'lb'}",
+                );
+                return;
+              }
+              setLocalState(() => errorText = null);
+            }
+
+            void applyValue() {
+              final v = controller.text.trim();
+              final parsed = int.tryParse(v);
+
+              if (v.isEmpty) {
+                setLocalState(() => errorText = "Weight can't be empty");
+                return;
+              }
+              if (parsed == null) {
+                setLocalState(() => errorText = "Please enter a valid number");
+                return;
+              }
+              if (parsed < minDisplay || parsed > maxDisplay) {
+                setLocalState(
+                      () => errorText =
+                  "Weight must be between $minDisplay and $maxDisplay ${isKgNow ? 'kg' : 'lb'}",
+                );
+                return;
+              }
+
+              if (isKgNow) {
+                _setKg(parsed);
+              } else {
+                // input LB -> convert ke KG (source of truth tetap kg)
+                final int kg = _lbToKg(parsed);
+                _setKg(kg);
+              }
+
+              Navigator.pop(ctx);
+            }
+
+            return AlertDialog(
+              backgroundColor: const Color(0xFF232222),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              title: Text(
+                "Enter your weight (${isKgNow ? 'kg' : 'lb'})",
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              content: TextField(
+                controller: controller,
+                keyboardType: TextInputType.number,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w600,
+                ),
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(3),
+                ],
+                decoration: InputDecoration(
+                  hintText: isKgNow ? "e.g. 75" : "e.g. 165",
+                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                  errorText: errorText,
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.white.withOpacity(0.35)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFFE2F163), width: 1.2),
+                  ),
+                ),
+                onChanged: validate,
+                onSubmitted: (_) => applyValue(),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: Text(
+                    "Cancel",
+                    style: TextStyle(color: Colors.white.withOpacity(0.8)),
+                  ),
+                ),
+                TextButton(
+                  onPressed: applyValue,
+                  child: const Text(
+                    "OK",
+                    style: TextStyle(color: Color(0xFFE2F163), fontWeight: FontWeight.w700),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -118,11 +251,11 @@ class _WeightState extends State<Weight> {
                       child: InkWell(
                         borderRadius: BorderRadius.circular(14),
                         onTap: _switchToKg,
-                        child: Center(
+                        child: const Center(
                           child: Text(
                             'KG',
                             style: TextStyle(
-                              color: const Color(0xFF232222),
+                              color: Color(0xFF232222),
                               fontSize: 20,
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w700,
@@ -141,11 +274,11 @@ class _WeightState extends State<Weight> {
                       child: InkWell(
                         borderRadius: BorderRadius.circular(14),
                         onTap: _switchToLb,
-                        child: Center(
+                        child: const Center(
                           child: Text(
                             'LB',
                             style: TextStyle(
-                              color: const Color(0xFF232222),
+                              color: Color(0xFF232222),
                               fontSize: 20,
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w700,
@@ -277,34 +410,51 @@ class _WeightState extends State<Weight> {
 
               const SizedBox(height: 50),
 
-              // ✅ Big number bawah (ikut KG/LB)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    '$displayValue',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 64,
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w700,
+              // ✅ Big number bawah (ikut KG/LB) + tap to type
+              GestureDetector(
+                onTap: _showManualWeightInput,
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          '$displayValue',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 64,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Opacity(
+                          opacity: 0.65,
+                          child: Text(
+                            unit,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(width: 6),
-                  Opacity(
-                    opacity: 0.65,
-                    child: Text(
-                      unit,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
+                    const SizedBox(height: 6),
+                    Text(
+                      'Tap to type',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.55),
+                        fontSize: 12,
                         fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
 
               const Spacer(),
@@ -359,4 +509,7 @@ class _WeightState extends State<Weight> {
   }
 
   int _toLb(int kg) => (kg * 2.2046226218).round();
+
+  // ✅ lb -> kg converter
+  int _lbToKg(int lb) => (lb / 2.2046226218).round();
 }

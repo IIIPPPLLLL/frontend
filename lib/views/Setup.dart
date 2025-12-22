@@ -46,11 +46,12 @@ class ASetUp extends StatelessWidget {
                 child: SizedBox(
                   width: 323,
                   child: Text(
-                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ',
+                    "Consistency is what turns effort into results."
+                    " Keep showing up. Your future self will thank you." ,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 14,
+                      fontSize: 19,
                       fontFamily: 'League Spartan',
                       fontWeight: FontWeight.w300,
                       height: 1,

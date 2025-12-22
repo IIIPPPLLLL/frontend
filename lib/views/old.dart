@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert'; // Jangan lupa import ini
+import 'package:flutter/services.dart';
 import '../routes/app_routes.dart';
 import '../service/api_service.dart';
 
@@ -195,15 +196,32 @@ class _AHowOldState extends State<AHowOld> {
 
               const SizedBox(height: 70),
 
-              // Big Age
-              Text(
-                '$_age',
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 64,
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w700,
+              // ✅ Big Age (tap to input manual)
+              GestureDetector(
+                onTap: _showManualAgeInput,
+                child: Column(
+                  children: [
+                    Text(
+                      '$_age',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 64,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "Tap to type",
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.55),
+                        fontSize: 12,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
               ),
 
@@ -219,120 +237,117 @@ class _AHowOldState extends State<AHowOld> {
                     _setAge(_age + 1);
                   }
                 },
-                child: Opacity(
-                  opacity: _isLoading ? 0.6 : 1.0,
-                  child: Container(
-                    height: 99,
-                    width: double.infinity,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF588D6E),
-                    ),
-                    child: Stack(
-                      children: [
-                        // divider kiri & kanan (mirip figma)
-                        Positioned(
-                          left: 0,
-                          right: 0,
-                          top: 0,
-                          bottom: 0,
-                          child: LayoutBuilder(
-                            builder: (context, c) {
-                              final w = c.maxWidth;
-                              final center = w / 2;
+                child: Container(
+                  height: 99,
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF588D6E),
+                  ),
+                  child: Stack(
+                    children: [
+                      // divider kiri & kanan (mirip figma)
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        top: 0,
+                        bottom: 0,
+                        child: LayoutBuilder(
+                          builder: (context, c) {
+                            final w = c.maxWidth;
+                            final center = w / 2;
 
-                              return Stack(
-                                children: [
-                                  Positioned(
-                                    left: center - 59, // ~118/2
-                                    top: -10,
-                                    bottom: -10,
-                                    child: Container(
-                                      width: 2,
-                                      color: Colors.white,
-                                    ),
+                            return Stack(
+                              children: [
+                                Positioned(
+                                  left: center - 59,
+                                  top: -10,
+                                  bottom: -10,
+                                  child: Container(
+                                    width: 2,
+                                    color: Colors.white,
                                   ),
-                                  Positioned(
-                                    left: center + 59,
-                                    top: -10,
-                                    bottom: -10,
-                                    child: Container(
-                                      width: 2,
-                                      color: Colors.white,
-                                    ),
+                                ),
+                                Positioned(
+                                  left: center + 59,
+                                  top: -10,
+                                  bottom: -10,
+                                  child: Container(
+                                    width: 2,
+                                    color: Colors.white,
                                   ),
-                                ],
-                              );
-                            },
-                          ),
+                                ),
+                              ],
+                            );
+                          },
                         ),
+                      ),
 
-                        // numbers row
-                        Center(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Opacity(
-                                opacity: 0.45,
-                                child: Text(
-                                  '$a1',
-                                  style: const TextStyle(
-                                    color: Color(0xFF232222),
-                                    fontSize: 25,
-                                    fontFamily: 'Poppins',
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ),
-                              Opacity(
-                                opacity: 0.65,
-                                child: Text(
-                                  '$a2',
-                                  style: const TextStyle(
-                                    color: Color(0xFF232222),
-                                    fontSize: 35,
-                                    fontFamily: 'Poppins',
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ),
-                              Text(
-                                '$a3',
+                      // numbers row
+                      Center(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Opacity(
+                              opacity: 0.45,
+                              child: Text(
+                                '$a1',
                                 style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 40,
+                                  color: Color(0xFF232222),
+                                  fontSize: 25,
                                   fontFamily: 'Poppins',
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
-                              Opacity(
-                                opacity: 0.65,
-                                child: Text(
-                                  '$a4',
-                                  style: const TextStyle(
-                                    color: Color(0xFF232222),
-                                    fontSize: 35,
-                                    fontFamily: 'Poppins',
-                                    fontWeight: FontWeight.w700,
-                                  ),
+                            ),
+                            Opacity(
+                              opacity: 0.65,
+                              child: Text(
+                                '$a2',
+                                style: const TextStyle(
+                                  color: Color(0xFF232222),
+                                  fontSize: 35,
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
-                              Opacity(
-                                opacity: 0.45,
-                                child: Text(
-                                  '$a5',
-                                  style: const TextStyle(
-                                    color: Color(0xFF232222),
-                                    fontSize: 25,
-                                    fontFamily: 'Poppins',
-                                    fontWeight: FontWeight.w700,
-                                  ),
+                            ),
+                            Text(
+                              '$a3',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 40,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            Opacity(
+                              opacity: 0.65,
+                              child: Text(
+                                '$a4',
+                                style: const TextStyle(
+                                  color: Color(0xFF232222),
+                                  fontSize: 35,
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                            Opacity(
+                              opacity: 0.45,
+                              child: Text(
+                                '$a5',
+                                style: const TextStyle(
+                                  color: Color(0xFF232222),
+                                  fontSize: 25,
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -389,16 +404,7 @@ class _AHowOldState extends State<AHowOld> {
                         borderRadius: BorderRadius.circular(100),
                       ),
                     ),
-                    child: _isLoading
-                        ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                        : const Text(
+                    child: const Text(
                       'Continue',
                       style: TextStyle(
                         fontSize: 18,
