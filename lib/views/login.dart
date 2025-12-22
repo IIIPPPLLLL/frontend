@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../routes/app_routes.dart';
 import '../service/api_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 class ALogIn extends StatefulWidget {
   const ALogIn({super.key});
@@ -33,6 +35,7 @@ class _ALogInState extends State<ALogIn> {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
 
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -40,9 +43,30 @@ class _ALogInState extends State<ALogIn> {
             ),
           ),
         );
+        final token = data['data']['token'] ??
+            data['token'] ??
+            data['access_token'] ??
+            data['accessToken'];
 
+        if (token != null) {
+          // Simpan token ke SharedPreferences
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('token', token);
+
+          // Navigasi ke gender page
+          Navigator.pushNamed(context, AppRoutes.gender);
+        } else {
+          // Token tidak ditemukan di response
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Token not found in response'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
         // ✅ PINDAH HALAMAN
         Navigator.pushReplacementNamed(context, AppRoutes.setup);
+
       } else if (response.statusCode == 401) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

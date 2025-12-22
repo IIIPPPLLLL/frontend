@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../routes/app_routes.dart';
+import '../service/api_service.dart';
 
 class GenderA extends StatefulWidget {
   const GenderA({super.key});
@@ -10,11 +12,89 @@ class GenderA extends StatefulWidget {
 
 class _GenderAState extends State<GenderA> {
   String? selectedGender; // 'male' | 'female'
+  bool _isLoading = false;
+  String? _token;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadToken();
+  }
+
+  Future<void> _loadToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    setState(() {
+      _token = token;
+    });
+  }
+
+  Future<void> _updateGender() async {
+    if (selectedGender == null || _token == null) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Kirim gender dengan token
+      final response = await ApiService.gender(selectedGender!, _token!);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        // Jika berhasil, navigasi ke halaman berikutnya
+        Navigator.pushNamed(
+          context,
+          AppRoutes.old,
+          arguments: selectedGender,
+        );
+      } else if (response.statusCode == 401) {
+        // Token expired atau tidak valid
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Session expired. Please login again.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        // Bisa navigasi ke login page
+        // Navigator.pushReplacementNamed(context, AppRoutes.login);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${response.statusCode}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Connection error: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final bool isMaleSelected = selectedGender == 'male';
     final bool isFemaleSelected = selectedGender == 'female';
+
+    // Tampilkan loading jika token belum diambil
+    if (_token == null && !_isLoading) {
+      return Scaffold(
+        backgroundColor: const Color(0xFF232222),
+        body: const Center(
+          child: CircularProgressIndicator(
+            color: Color(0xFFE2F163),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       backgroundColor: const Color(0xFF232222),
@@ -27,7 +107,7 @@ class _GenderAState extends State<GenderA> {
 
               // Back Button
               GestureDetector(
-                onTap: () => Navigator.pop(context),
+                onTap: _isLoading ? null : () => Navigator.pop(context),
                 child: Row(
                   children: const [
                     Icon(
@@ -66,45 +146,48 @@ class _GenderAState extends State<GenderA> {
 
               // Male
               GestureDetector(
-                onTap: () => setState(() => selectedGender = 'male'),
-                child: Column(
-                  children: [
-                    Container(
-                      width: 163,
-                      height: 163,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: isMaleSelected
-                            ? const Color(0xFF2EC4FF).withOpacity(0.80)
-                            : Colors.white.withOpacity(0.09),
-                        border: Border.all(
-                          width: 2,
+                onTap: _isLoading ? null : () => setState(() => selectedGender = 'male'),
+                child: Opacity(
+                  opacity: _isLoading ? 0.6 : 1.0,
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 163,
+                        height: 163,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
                           color: isMaleSelected
-                              ? const Color(0xFF2EC4FF)
-                              : Colors.white,
+                              ? const Color(0xFF2EC4FF).withOpacity(0.80)
+                              : Colors.white.withOpacity(0.09),
+                          border: Border.all(
+                            width: 2,
+                            color: isMaleSelected
+                                ? const Color(0xFF2EC4FF)
+                                : Colors.white,
+                          ),
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.male,
+                            size: 70,
+                            color: isMaleSelected
+                                ? const Color(0xFFE2F163)
+                                : Colors.white70,
+                          ),
                         ),
                       ),
-                      child: Center(
-                        child: Icon(
-                          Icons.male,
-                          size: 70,
-                          color: isMaleSelected
-                              ? const Color(0xFFE2F163)
-                              : Colors.white70,
+                      const SizedBox(height: 10),
+                      const Text(
+                        'Male',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    const Text(
-                      'Male',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
 
@@ -112,43 +195,46 @@ class _GenderAState extends State<GenderA> {
 
               // Female
               GestureDetector(
-                onTap: () => setState(() => selectedGender = 'female'),
-                child: Column(
-                  children: [
-                    Container(
-                      width: 163,
-                      height: 163,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: isFemaleSelected
-                            ? const Color(0xFFFF5FA2)
-                            : Colors.white.withOpacity(0.09),
-                        border: Border.all(
-                          width: 2,
+                onTap: _isLoading ? null : () => setState(() => selectedGender = 'female'),
+                child: Opacity(
+                  opacity: _isLoading ? 0.6 : 1.0,
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 163,
+                        height: 163,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
                           color: isFemaleSelected
                               ? const Color(0xFFFF5FA2)
-                              : Colors.white,
+                              : Colors.white.withOpacity(0.09),
+                          border: Border.all(
+                            width: 2,
+                            color: isFemaleSelected
+                                ? const Color(0xFFFF5FA2)
+                                : Colors.white,
+                          ),
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.female,
+                            size: 70,
+                            color: isFemaleSelected ? Colors.white : Colors.white70,
+                          ),
                         ),
                       ),
-                      child: Center(
-                        child: Icon(
-                          Icons.female,
-                          size: 70,
-                          color: isFemaleSelected ? Colors.white : Colors.white70,
+                      const SizedBox(height: 10),
+                      const Text(
+                        'Female',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    const Text(
-                      'Female',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
 
@@ -160,7 +246,7 @@ class _GenderAState extends State<GenderA> {
                 height: 44,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: selectedGender == null
+                    color: selectedGender == null || _isLoading || _token == null
                         ? Colors.white.withOpacity(0.05)
                         : Colors.white.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(100),
@@ -170,22 +256,25 @@ class _GenderAState extends State<GenderA> {
                     ),
                   ),
                   child: TextButton(
-                    onPressed: selectedGender == null
+                    onPressed: selectedGender == null || _isLoading || _token == null
                         ? null
-                        : () {
-                      Navigator.pushNamed(
-                        context,
-                        AppRoutes.old,
-                        arguments: selectedGender,
-                      );
-                    },
+                        : _updateGender,
                     style: TextButton.styleFrom(
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(100),
                       ),
                     ),
-                    child: const Text(
+                    child: _isLoading
+                        ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                        : const Text(
                       'Continue',
                       style: TextStyle(
                         fontSize: 18,
