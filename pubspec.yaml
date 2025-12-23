@@ -90,6 +90,19 @@ flutter:
     - assets/images/fitness.png
     - assets/images/recipe.png
     - assets/images/jokowi.jpeg
+    - assets/images/carrot.png
+    - assets/images/salad3.png
+    - assets/images/salmon2.png
+    - assets/images/stoberi.png
+    - assets/images/yogurt2.png
+    - assets/images/trainer-11.png
+    - assets/images/trainer-12.png
+    - assets/images/trainer-13.png
+    - assets/images/trainer-14.png
+    - assets/images/trainer-21.png
+    - assets/images/trainer-22.png
+    - assets/images/trainer-23.png
+    - assets/images/trainer-24.png
     #icons
     - assets/icons/
 
