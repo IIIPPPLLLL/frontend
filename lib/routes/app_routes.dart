@@ -32,6 +32,11 @@ import '../views/meal3.dart';
 import '../views/meal4.dart';
 import '../views/meal5.dart';
 import '../views/consult.dart';
+import '../views/recipe.dart';
+import '../views/trainer1.dart';
+import '../views/trainer2.dart';
+import '../views/nutri1.dart';
+import '../views/nutri2.dart';
 
 class AppRoutes {
   static const String splash = '/';
@@ -62,6 +67,11 @@ class AppRoutes {
   static const String meal4 = '/MealPlans4';
   static const String meal5 = '/MealPlans5';
   static const String consult = '/Consultation';
+  static const String recipe = '/Recipe';
+  static const String trainer1 = '/Trainer';
+  static const String trainer2 = '/Trainer2';
+  static const String nutri1 = '/Nutritionist1';
+  static const String nutri2 = '/Nutritionist2';
 
 
 
@@ -95,6 +105,11 @@ class AppRoutes {
     meal3: (context) => MealPlans3(),
     meal4: (context) => MealPlans4(),
     meal5: (context) => MealPlans5(),
-    consult: (context) => Consultation()
+    consult: (context) => Consultation(),
+    recipe: (context) => Recipe(),
+    trainer1: (context) => Trainer(),
+    trainer2: (context) => Trainer2(),
+    nutri1: (context) => Nutritionist1(),
+    nutri2: (context) => Nutritionist2()
   };
 }
