@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../routes/app_routes.dart';
+import '../service/api_service.dart';
 
 class Weight extends StatefulWidget {
   const Weight({super.key});
@@ -10,15 +12,32 @@ class Weight extends StatefulWidget {
 }
 
 class _WeightState extends State<Weight> {
-  // ✅ state
-  bool _isKg = true; // true = KG, false = LB
+  // ✅ state (TIDAK DIUBAH)
+  bool _isKg = true;
   int _weightKg = 75;
+  bool _isLoading = false; // HANYA TAMBAHAN INI
+  String? _token; // HANYA TAMBAHAN INI
 
-  // range
+  // range (TIDAK DIUBAH)
   static const int _minKg = 30;
   static const int _maxKg = 200;
 
-  // helper convert
+  @override
+  void initState() {
+    super.initState();
+    _getToken(); // HANYA TAMBAHAN INI
+  }
+
+  // HANYA TAMBAHAN INI
+  Future<void> _getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    setState(() {
+      _token = token;
+    });
+  }
+
+  // helper convert (TIDAK DIUBAH)
   int get _weightLb => (_weightKg * 2.2046226218).round();
 
   void _setKg(int v) {
@@ -35,9 +54,9 @@ class _WeightState extends State<Weight> {
     setState(() => _isKg = false);
   }
 
-  // swipe horizontal (penggaris)
+  // swipe horizontal (penggaris) - TIDAK DIUBAH
   void _onRulerDrag(DragUpdateDetails details) {
-    // geser kiri -> naik, geser kanan -> turun (feel natural bisa kamu balik)
+    // geser kiri -> naik, geser kanan -> turun
     if (details.delta.dx < -6) {
       _setKg(_weightKg + 1);
     } else if (details.delta.dx > 6) {
@@ -45,7 +64,69 @@ class _WeightState extends State<Weight> {
     }
   }
 
-  // ✅ manual input (tap to type)
+  // ✅ HANYA UBAH METHOD INI: _handleContinue dengan API integration
+  Future<void> _handleContinue() async {
+    if (_token == null) {
+      _showErrorSnackbar('Session expired. Please login again.');
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Kirim weight ke backend
+      final response = await ApiService.weight(_weightKg, _token!);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        print('✅ Height updated successfully');
+
+        // Tampilkan success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Height saved!'),
+            backgroundColor: Colors.green,
+            duration: Duration(milliseconds: 800),
+          ),
+        );
+
+        // Jika berhasil, navigasi ke halaman berikutnya
+        Navigator.pushNamed(
+          context,
+          AppRoutes.activity,
+          arguments: {
+            'unit': _isKg ? 'kg' : 'lb',
+            'weightKg': _weightKg,
+            'weightLb': _weightLb,
+          },
+        );
+      } else if (response.statusCode == 401) {
+        _showErrorSnackbar('Session expired. Please login again.');
+      } else {
+        _showErrorSnackbar('Error ${response.statusCode}: ${response.body}');
+      }
+    } catch (e) {
+      _showErrorSnackbar('Network error: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  // HANYA TAMBAHAN INI
+  void _showErrorSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
+  // ✅ manual input (tap to type) - TIDAK DIUBAH
   Future<void> _showManualWeightInput() async {
     final bool isKgNow = _isKg;
 
@@ -179,7 +260,7 @@ class _WeightState extends State<Weight> {
 
   @override
   Widget build(BuildContext context) {
-    // angka sekitar buat row atas (73 74 75 76 77)
+    // angka sekitar buat row atas (73 74 75 76 77) - TIDAK DIUBAH
     final int w1 = (_weightKg - 2).clamp(_minKg, _maxKg);
     final int w2 = (_weightKg - 1).clamp(_minKg, _maxKg);
     final int w3 = _weightKg;
@@ -198,7 +279,7 @@ class _WeightState extends State<Weight> {
             children: [
               const SizedBox(height: 20),
 
-              // Back
+              // Back - TIDAK DIUBAH
               GestureDetector(
                 onTap: () => Navigator.pop(context),
                 child: Row(
@@ -224,7 +305,7 @@ class _WeightState extends State<Weight> {
 
               const SizedBox(height: 40),
 
-              // Title
+              // Title - TIDAK DIUBAH
               const Text(
                 'What Is Your Weight?',
                 style: TextStyle(
@@ -237,7 +318,7 @@ class _WeightState extends State<Weight> {
 
               const SizedBox(height: 30),
 
-              // ✅ Toggle KG | LB (bisa dipencet)
+              // ✅ Toggle KG | LB - TIDAK DIUBAH
               Container(
                 width: double.infinity,
                 height: 58,
@@ -294,7 +375,7 @@ class _WeightState extends State<Weight> {
 
               const SizedBox(height: 40),
 
-              // ✅ Ruler + numbers (geser kanan kiri)
+              // ✅ Ruler + numbers - TIDAK DIUBAH
               GestureDetector(
                 onHorizontalDragUpdate: _onRulerDrag,
                 child: Column(
@@ -410,7 +491,7 @@ class _WeightState extends State<Weight> {
 
               const SizedBox(height: 50),
 
-              // ✅ Big number bawah (ikut KG/LB) + tap to type
+              // ✅ Big number bawah - TIDAK DIUBAH
               GestureDetector(
                 onTap: _showManualWeightInput,
                 child: Column(
@@ -459,7 +540,7 @@ class _WeightState extends State<Weight> {
 
               const Spacer(),
 
-              // Continue Button
+              // ✅ Continue Button - HANYA UBAH ONPRESSED
               SizedBox(
                 width: 180,
                 height: 44,
@@ -470,17 +551,7 @@ class _WeightState extends State<Weight> {
                     border: Border.all(width: 0.50, color: Colors.white),
                   ),
                   child: TextButton(
-                    onPressed: () {
-                      Navigator.pushNamed(
-                        context,
-                        AppRoutes.activity,
-                        arguments: {
-                          'unit': unit,
-                          'weightKg': _weightKg,
-                          'weightLb': _weightLb,
-                        },
-                      );
-                    },
+                    onPressed: _isLoading ? null : _handleContinue, // DIUBAH
                     style: TextButton.styleFrom(
                       foregroundColor: Colors.white,
                       padding: EdgeInsets.zero,
@@ -488,7 +559,16 @@ class _WeightState extends State<Weight> {
                         borderRadius: BorderRadius.circular(100),
                       ),
                     ),
-                    child: const Text(
+                    child: _isLoading // HANYA TAMBAHAN INI
+                        ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                        : const Text(
                       'Continue',
                       style: TextStyle(
                         fontSize: 18,
@@ -510,6 +590,6 @@ class _WeightState extends State<Weight> {
 
   int _toLb(int kg) => (kg * 2.2046226218).round();
 
-  // ✅ lb -> kg converter
+  // ✅ lb -> kg converter - TIDAK DIUBAH
   int _lbToKg(int lb) => (lb / 2.2046226218).round();
 }

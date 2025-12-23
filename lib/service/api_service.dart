@@ -96,6 +96,50 @@ class ApiService {
       }),
     );
   }
+
+  static Future<http.Response> physicalActivity(
+      String activity_level,
+      String token, // Tambahkan parameter token
+      ) {
+    return http.put(
+      Uri.parse('$baseUrl/user/physical_activity/update'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token', // Tambahkan header Authorization
+      },
+      body: jsonEncode({
+        'physical_activity_level': activity_level,
+      }),
+    );
+  }
+
+  static Future<http.Response> profile(
+    String token
+      ){
+    return http.get(
+      Uri.parse('$baseUrl/user/profile'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token', // Tambahkan header Authorization
+      });
+  }
+
+  static Future<http.Response> goal(
+      String goal,
+      String token, // Tambahkan parameter token
+      ) {
+    return http.put(
+      Uri.parse('$baseUrl/user/goal/update'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token', // Tambahkan header Authorization
+      },
+      body: jsonEncode({
+        'goal': goal,
+      }),
+    );
+  }
+
   // OPTIONAL: Method untuk cek apakah token valid
   static Future<http.Response> verifyToken(String token) {
     return http.get(
