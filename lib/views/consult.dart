@@ -39,7 +39,7 @@ class _ConsultationState extends State<Consultation> {
     }
 
     String? _routeForRole() {
-      if (selectedRole == 0) return AppRoutes.onboard2; // NUTRITIONISTS
+      if (selectedRole == 0) return AppRoutes.nutri1; // NUTRITIONISTS
       if (selectedRole == 1) return AppRoutes.trainer1; // TRAINER
       if (selectedRole == 2) return AppRoutes.recipe; // RECIPE
       return null;
