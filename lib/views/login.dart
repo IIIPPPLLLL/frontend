@@ -43,6 +43,7 @@ class _ALogInState extends State<ALogIn> {
             ),
           ),
         );
+        await Future.delayed(const Duration(milliseconds: 300));
         final token = data['data']['token'] ??
             data['token'] ??
             data['access_token'] ??

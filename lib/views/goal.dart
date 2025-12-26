@@ -46,9 +46,16 @@ class _GoalState extends State<Goal> {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         print('✅ Goal saved successfully!');
-
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Goal saved!'),
+            backgroundColor: Colors.green,
+            duration: Duration(milliseconds: 800),
+          ),
+        );
+        await Future.delayed(const Duration(milliseconds: 300));
         // Navigate to home
-        Navigator.pushReplacementNamed(
+        Navigator.pushNamed(
           context,
           AppRoutes.home,
           arguments: _selected,

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import '../routes/app_routes.dart';
+import '../service/api_service.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -20,11 +23,86 @@ class _HomeState extends State<Home> {
   bool _starArtLeft = false;
   bool _starArtRight = false;
 
+  // State untuk data profil
+  String? _username;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfileData();
+  }
+
+  Future<void> _loadProfileData() async {
+    print('🔄 === LOADING PROFILE DATA FOR HOME ===');
+
+    try {
+      // Get token from shared preferences
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+
+      if (token == null || token.isEmpty) {
+        print('❌ Token is null, using default name');
+        setState(() {
+          _username = 'Max';
+          _isLoading = false;
+        });
+        return;
+      }
+
+      print('🚀 Calling ApiService.profile() for Home...');
+      final response = await ApiService.profile(token);
+
+      print('📡 Response Status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        try {
+          final data = jsonDecode(response.body);
+
+          // Extract username from the API response structure
+          if (data.containsKey('data') && data['data'] is Map) {
+            final userData = data['data'] as Map<String, dynamic>;
+            final username = userData['username']?.toString() ?? 'Max';
+
+            setState(() {
+              _username = username;
+              _isLoading = false;
+            });
+
+            print('✅ Home username loaded: $username');
+          } else {
+            throw Exception('Data structure not found');
+          }
+        } catch (e) {
+          print('❌ JSON Parse Error: $e');
+          setState(() {
+            _username = 'Max';
+            _isLoading = false;
+          });
+        }
+      } else {
+        print('❌ API Error: ${response.statusCode}');
+        setState(() {
+          _username = 'Max';
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('❌ Exception: $e');
+      setState(() {
+        _username = 'Max';
+        _isLoading = false;
+      });
+    }
+
+    print('=== END LOADING ===\n');
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    // Scale biar “fix ke HP” tapi tetap preserve posisi figma
+    // Scale biar "fix ke HP" tapi tetap preserve posisi figma
     final sx = size.width / Home._designW;
     final sy = size.height / Home._designH;
 
@@ -329,12 +407,21 @@ class _HomeState extends State<Home> {
             children: [
               Positioned.fill(child: Container(color: const Color(0xFF212020))),
 
-              // Hi, Max
+              // Hi, [Username] - menampilkan data dari API
               Positioned(
                 left: w(34),
                 top: h(30),
-                child: Text(
-                  'Hi, Max',
+                child: _isLoading
+                    ? Container(
+                  width: w(100),
+                  height: h(24),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[800],
+                    borderRadius: BorderRadius.circular(w(4)),
+                  ),
+                )
+                    : Text(
+                  'Hi, ${_username ?? 'Max'}',
                   style: TextStyle(
                     color: const Color(0xFF588D6E),
                     fontSize: w(20),
@@ -389,7 +476,7 @@ class _HomeState extends State<Home> {
                     ),
                     SizedBox(width: w(14)),
                     GestureDetector(
-                      onTap: () => Navigator.pushNamed(context, AppRoutes.profile),
+                      onTap: () => Navigator.pushNamed(context, AppRoutes.homeprofile),
                       child: svgPlaceholder(
                         assetPath: 'assets/icons/logo-profile.svg',
                         width: w(20),
@@ -403,12 +490,12 @@ class _HomeState extends State<Home> {
 
               // Progress tracking + Consultation + New Feature (tanpa divider)
               Positioned(
-                left: w(35),
+                left: w(25),
                 top: h(95),
                 child: SizedBox(
-                  width: w(323),
+                  width: w(343),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly, // 🔥 auto rapi
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       // ===== Progress Tracking =====
                       GestureDetector(
@@ -463,12 +550,11 @@ class _HomeState extends State<Home> {
                         ),
                       ),
 
-                      // ===== NEW FEATURE (PLACEHOLDER) =====
+                      // ===== MEAL PLANS =====
                       GestureDetector(
                         onTap: () => Navigator.pushNamed(context, AppRoutes.meal),
                         child: Column(
                           children: [
-                            // 🔧 SVG placeholder (ganti asset nanti)
                             SvgPicture.asset(
                               'assets/icons/meal-menu.svg',
                               width: w(26),
@@ -490,13 +576,37 @@ class _HomeState extends State<Home> {
                           ],
                         ),
                       ),
+
+                      // ===== EAT SCHEDULE =====
+                      GestureDetector(
+                        onTap: () => Navigator.pushNamed(context, AppRoutes.eat1),
+                        child: Column(
+                          children: [
+                            SvgPicture.asset(
+                              'assets/icons/icon-calendar.svg',
+                              width: w(26),
+                              height: w(26),
+                              color: Colors.white,
+                            ),
+                            SizedBox(height: h(6)),
+                            Text(
+                              'Eat\nSchedule',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: w(12),
+                                fontFamily: 'League Spartan',
+                                fontWeight: FontWeight.w300,
+                                height: 1.0,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
               ),
-
-
-
 
               // Recommendations header
               Positioned(
@@ -562,12 +672,12 @@ class _HomeState extends State<Home> {
                 onTap: () => Navigator.pushNamed(context, AppRoutes.home),
               ),
 
-              // ✅ Today’s Schedule title (naik)
+              // ✅ Today's Schedule title (naik)
               Positioned(
                 left: w(38),
                 top: h(up(420)),
                 child: Text(
-                  "Today’s Schedule",
+                  "Today's Schedule",
                   style: TextStyle(
                     color: const Color(0xFFE2F163),
                     fontSize: w(24),
@@ -739,7 +849,7 @@ class _HomeState extends State<Home> {
                         ),
                       ),
                       GestureDetector(
-                        onTap: () => Navigator.pushNamed(context, AppRoutes.profile),
+                        onTap: () => Navigator.pushNamed(context, AppRoutes.chatbot),
                         child: svgPlaceholder(
                           assetPath: 'assets/icons/logo-profile2.svg',
                           width: w(26),

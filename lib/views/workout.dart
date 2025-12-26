@@ -1,8 +1,162 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../routes/app_routes.dart';
+import '../service/api_service.dart';
+import 'dart:convert';
 
-class WorkoutLogs extends StatelessWidget {
+class WorkoutLogs extends StatefulWidget {
   const WorkoutLogs({super.key});
+
+  @override
+  State<WorkoutLogs> createState() => _WorkoutLogsState();
+}
+
+class _WorkoutLogsState extends State<WorkoutLogs> {
+  bool _isLoading = true;
+  Map<String, dynamic>? _profileData;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfileData();
+  }
+
+  Future<String?> _getToken() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getString('token');
+    } catch (e) {
+      print('Error getting token: $e');
+      return null;
+    }
+  }
+
+  Future<void> _loadProfileData() async {
+    print('🔄 === LOADING PROFILE DATA FOR WORKOUT LOGS ===');
+
+    try {
+      setState(() {
+        _isLoading = true;
+        _errorMessage = null;
+      });
+
+      final token = await _getToken();
+
+      if (token == null || token.isEmpty) {
+        print('❌ Token is null');
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'Token tidak ditemukan. Silakan login ulang.';
+          _profileData = {
+            'username': 'Max',
+            'age': '28',
+            'weight': '75',
+            'height': '165',
+          };
+        });
+        return;
+      }
+
+      print('🚀 Calling ApiService.profile()...');
+      final response = await ApiService.profile(token);
+
+      print('📡 Response Status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        print('✅ Success 200! Parsing JSON...');
+        try {
+          final data = jsonDecode(response.body);
+          print('✅ JSON parsed successfully');
+
+          // Extract data from the API response structure
+          if (data.containsKey('data') && data['data'] is Map) {
+            final userData = data['data'] as Map<String, dynamic>;
+
+            // Extract health profile
+            Map<String, dynamic>? healthProfile;
+            if (userData.containsKey('health_profile') &&
+                userData['health_profile'] is Map) {
+              healthProfile = userData['health_profile'] as Map<String, dynamic>;
+            }
+
+            setState(() {
+              _profileData = {
+                'username': userData['username']?.toString() ?? 'User',
+                'age': userData['age']?.toString() ?? '28',
+                'weight': healthProfile?['weight']?.toString() ?? '75',
+                'height': healthProfile?['height']?.toString() ?? '165',
+              };
+              _isLoading = false;
+            });
+
+            // Print data to console for debugging
+            print('✅ Workout Logs Profile Data:');
+            print('   👤 Username: ${_profileData!['username']}');
+            print('   🎂 Age: ${_profileData!['age']}');
+            print('   ⚖️ Weight: ${_profileData!['weight']}');
+            print('   📏 Height: ${_profileData!['height']}');
+          } else {
+            throw Exception('Data structure not found');
+          }
+        } catch (e) {
+          print('❌ JSON Parse Error: $e');
+          setState(() {
+            _isLoading = false;
+            _errorMessage = 'Failed to parse profile data: $e';
+            _profileData = {
+              'username': 'Max',
+              'age': '28',
+              'weight': '75',
+              'height': '165',
+            };
+          });
+        }
+      } else if (response.statusCode == 401) {
+        print('❌ 401 Unauthorized');
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'Session expired. Please login again.';
+          _profileData = {
+            'username': 'Max',
+            'age': '28',
+            'weight': '75',
+            'height': '165',
+          };
+        });
+      } else {
+        print('❌ Other error: ${response.statusCode}');
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'Failed to load profile: ${response.statusCode}';
+          _profileData = {
+            'username': 'Max',
+            'age': '28',
+            'weight': '75',
+            'height': '165',
+          };
+        });
+      }
+    } catch (e) {
+      print('❌ Exception: $e');
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Network error: ${e.toString()}';
+        _profileData = {
+          'username': 'Max',
+          'age': '28',
+          'weight': '75',
+          'height': '165',
+        };
+      });
+    }
+
+    print('=== END LOADING ===\n');
+  }
+
+  Future<void> _retryLoadProfile() async {
+    await _loadProfileData();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -11,7 +165,6 @@ class WorkoutLogs extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // ===== CONTENT =====
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(18, 14, 18, 16),
@@ -44,28 +197,56 @@ class WorkoutLogs extends StatelessWidget {
                     ),
                     const SizedBox(height: 14),
 
-                    // Profile summary row
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: _ProfileInfo(),
-                        ),
-                        const SizedBox(width: 12),
-                        _AvatarPlaceholder(),
-                      ],
-                    ),
+                    if (_errorMessage != null)
+                      Column(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            margin: const EdgeInsets.only(bottom: 12),
+                            decoration: BoxDecoration(
+                              color: Colors.red.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: Colors.red, width: 1),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.error_outline,
+                                    color: Colors.red, size: 20),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    _errorMessage!,
+                                    style: const TextStyle(
+                                      color: Colors.red,
+                                      fontSize: 14,
+                                      fontFamily: 'Poppins',
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.refresh,
+                                      color: Colors.red, size: 20),
+                                  onPressed: _retryLoadProfile,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+
+                    _isLoading
+                        ? _buildProfileLoading()
+                        : _buildProfileRow(),
 
                     const SizedBox(height: 16),
 
-                    // Segmented buttons (Workout Log / Charts)
                     Row(
                       children: [
                         Expanded(
                           child: _SegmentButton(
                             label: 'Workout Log',
                             isActive: false,
-                            // ROUTE for "Workout" button (Workout Log)
                             onTap: () {
                               Navigator.pushNamed(context, AppRoutes.tracking);
                             },
@@ -86,7 +267,6 @@ class WorkoutLogs extends StatelessWidget {
 
                     const SizedBox(height: 18),
 
-                    // Choose Date + Month dropdown label
                     Row(
                       children: [
                         const Expanded(
@@ -131,15 +311,9 @@ class WorkoutLogs extends StatelessWidget {
                     ),
 
                     const SizedBox(height: 12),
-
-                    // Weekday chips (MON..SUN)
                     const _WeekdayChips(),
-
                     const SizedBox(height: 12),
-
-                    // Calendar box
                     const _CalendarCard(),
-
                     const SizedBox(height: 18),
 
                     const Text(
@@ -153,7 +327,6 @@ class WorkoutLogs extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
 
-                    // Activity cards
                     const _ActivityCard(
                       kcal: '120 Kcal',
                       title: 'Upper Body Workout',
@@ -172,11 +345,9 @@ class WorkoutLogs extends StatelessWidget {
               ),
             ),
 
-            // ===== BOTTOM NAVBAR =====
             _BottomNav(
-              currentIndex: 1, // adjust to your tab index
+              currentIndex: 1,
               onTap: (i) {
-                // ROUTES for navbar
                 switch (i) {
                   case 0:
                     Navigator.pushNamed(context, AppRoutes.home);
@@ -188,7 +359,7 @@ class WorkoutLogs extends StatelessWidget {
                     Navigator.pushNamed(context, AppRoutes.home);
                     break;
                   case 3:
-                    Navigator.pushNamed(context, AppRoutes.profile);
+                    Navigator.pushNamed(context, AppRoutes.chatbot);
                     break;
                 }
               },
@@ -198,34 +369,134 @@ class WorkoutLogs extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildProfileLoading() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 100,
+                height: 22,
+                color: Colors.grey[800],
+                margin: const EdgeInsets.only(bottom: 6),
+              ),
+              Container(
+                width: 80,
+                height: 18,
+                color: Colors.grey[800],
+                margin: const EdgeInsets.only(bottom: 14),
+              ),
+              Row(
+                children: [
+                  Container(
+                    width: 60,
+                    height: 40,
+                    color: Colors.grey[800],
+                    margin: const EdgeInsets.only(right: 22),
+                  ),
+                  Container(
+                    width: 60,
+                    height: 40,
+                    color: Colors.grey[800],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 12),
+        Container(
+          width: 86,
+          height: 86,
+          decoration: BoxDecoration(
+            color: Colors.grey[800],
+            shape: BoxShape.circle,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildProfileRow() {
+    // Extract values with fallbacks
+    final username = _profileData?['username']?.toString() ?? 'Max';
+    final age = _profileData?['age']?.toString() ?? '28';
+    final weight = _profileData?['weight']?.toString() ?? '75';
+    final height = _profileData?['height']?.toString() ?? '165';
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: _ProfileInfo(
+            username: username,
+            age: age,
+            weight: weight,
+            height: height,
+          ),
+        ),
+        const SizedBox(width: 12),
+        const _AvatarPlaceholder(),
+      ],
+    );
+  }
 }
 
 // =====================
-// Widgets (clean + responsive)
+// Widgets
 // =====================
 
 class _ProfileInfo extends StatelessWidget {
-  const _ProfileInfo();
+  final String username;
+  final String age;
+  final String weight;
+  final String height;
+
+  const _ProfileInfo({
+    required this.username,
+    required this.age,
+    required this.weight,
+    required this.height,
+  });
 
   @override
   Widget build(BuildContext context) {
+    // Format berat dan tinggi - tambahkan satuan jika belum ada
+    String formattedWeight = weight;
+    if (!weight.toLowerCase().contains('kg') &&
+        weight.isNotEmpty &&
+        weight != 'Not set') {
+      formattedWeight = '$weight Kg';
+    }
+
+    String formattedHeight = height;
+    if (!height.toLowerCase().contains('cm') &&
+        height.isNotEmpty &&
+        height != 'Not set') {
+      formattedHeight = '$height CM';
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: const [
+      children: [
         Text(
-          'Max',
-          style: TextStyle(
+          username,
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 22,
             fontFamily: 'Poppins',
             fontWeight: FontWeight.w700,
           ),
         ),
-        SizedBox(height: 6),
+        const SizedBox(height: 6),
         Text.rich(
           TextSpan(
             children: [
-              TextSpan(
+              const TextSpan(
                 text: 'Age:',
                 style: TextStyle(
                   color: Colors.white,
@@ -235,8 +506,8 @@ class _ProfileInfo extends StatelessWidget {
                 ),
               ),
               TextSpan(
-                text: ' 28',
-                style: TextStyle(
+                text: ' $age',
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 14,
                   fontFamily: 'League Spartan',
@@ -246,17 +517,17 @@ class _ProfileInfo extends StatelessWidget {
             ],
           ),
         ),
-        SizedBox(height: 14),
+        const SizedBox(height: 14),
         Row(
           children: [
             _MetricBlock(
-              value: '75 Kg',
+              value: formattedWeight,
               label: 'Weight',
             ),
-            SizedBox(width: 22),
+            const SizedBox(width: 22),
             _MetricBlock(
-              value: '1.65 CM',
-              label: 'height',
+              value: formattedHeight,
+              label: 'Height',
             ),
           ],
         ),
@@ -318,6 +589,8 @@ class _MetricBlock extends StatelessWidget {
 }
 
 class _AvatarPlaceholder extends StatelessWidget {
+  const _AvatarPlaceholder();
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -330,7 +603,7 @@ class _AvatarPlaceholder extends StatelessWidget {
       ),
       child: const Center(
         child: Icon(Icons.person, color: Colors.black54, size: 34),
-      ), // placeholder (you will replace with image later)
+      ),
     );
   }
 }
@@ -416,7 +689,6 @@ class _CalendarCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // hardcoded like figma (you can wire it later)
     final grid = <List<String>>[
       ['1', '2', '3', '4', '5', '6', '7'],
       ['8', '9', '10', '11', '12', '13', '14'],
@@ -532,7 +804,6 @@ class _ActivityCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // icon placeholder
           Container(
             width: 46,
             height: 46,
@@ -546,7 +817,6 @@ class _ActivityCard extends StatelessWidget {
           ),
           const SizedBox(width: 12),
 
-          // left texts
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -587,7 +857,6 @@ class _ActivityCard extends StatelessWidget {
             ),
           ),
 
-          // right duration
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

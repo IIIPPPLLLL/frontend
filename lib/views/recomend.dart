@@ -400,7 +400,7 @@ class Rekomendasi extends StatelessWidget {
                       // HOME
                       GestureDetector(
                         onTap: (){
-                          Navigator.pushNamed(context, AppRoutes.eat1);
+                          Navigator.pushNamed(context, AppRoutes.home);
                         },
                           child: SvgPicture.asset(
                               'assets/icons/logo-home2.svg',
@@ -413,7 +413,7 @@ class Rekomendasi extends StatelessWidget {
                       ),
                       GestureDetector(
                         onTap: (){
-                          Navigator.pushNamed(context, AppRoutes.recomend);
+                          Navigator.pushNamed(context, AppRoutes.tracking);
                         },
                         child:SvgPicture.asset(
                         'assets/icons/icon-doc.svg',
@@ -427,7 +427,7 @@ class Rekomendasi extends StatelessWidget {
                       // DOC
                       GestureDetector(
                           onTap: (){
-                            Navigator.pushNamed(context, AppRoutes.recomend);
+                            Navigator.pushNamed(context, AppRoutes.home);
                           },
                           child:SvgPicture.asset(
                               'assets/icons/logo-star.svg',
@@ -442,7 +442,7 @@ class Rekomendasi extends StatelessWidget {
                       // PROFILE
                       GestureDetector(
                           onTap: (){
-                            Navigator.pushNamed(context, AppRoutes.recomend);
+                            Navigator.pushNamed(context, AppRoutes.chatbot);
                           },
                           child:SvgPicture.asset(
                               'assets/icons/logo-profile2.svg',

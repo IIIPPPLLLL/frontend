@@ -41,6 +41,14 @@ class _GenderAState extends State<GenderA> {
       final response = await ApiService.gender(selectedGender!, _token!);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Gender saved!'),
+            backgroundColor: Colors.green,
+            duration: Duration(milliseconds: 800),
+          ),
+        );
+        await Future.delayed(const Duration(milliseconds: 300));
         // Jika berhasil, navigasi ke halaman berikutnya
         Navigator.pushNamed(
           context,

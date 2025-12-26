@@ -1,11 +1,14 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../routes/app_routes.dart';
+import '../service/api_service.dart';
 
 class MealPlans2 extends StatefulWidget {
   const MealPlans2({super.key});
 
-  // ukuran figma
   static const double _designW = 393;
   static const double _designH = 852;
 
@@ -14,234 +17,307 @@ class MealPlans2 extends StatefulWidget {
 }
 
 class _MealPlans2State extends State<MealPlans2> {
-  // ====== STATE ======
-  String? dietaryPref;
-  String? allergy;
-  String? mealType;
+  // ================= STATE =================
+  final List<String> selectedAllergies = [];
+  final List<String> selectedFoods = [];
 
+  bool _isLoadingMeals = true;
+  List<Map<String, dynamic>> meals = [];
+
+  // ================= INIT =================
+  @override
+  void initState() {
+    super.initState();
+    _loadMeals();
+  }
+
+  // ================= TOKEN =================
+  Future<String?> _getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('token');
+  }
+
+  // ================= LOAD MEALS =================
+  Future<void> _loadMeals() async {
+    try {
+      final token = await _getToken();
+      if (token == null) return;
+
+      final response = await ApiService.getMeals(token);
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        final List<dynamic> data =
+        decoded is Map ? decoded['data'] ?? [] : decoded;
+
+        setState(() {
+          meals = data.cast<Map<String, dynamic>>();
+          _isLoadingMeals = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('❌ Load meals error: $e');
+      _isLoadingMeals = false;
+    }
+  }
+
+  // ================= SVG =================
+  Widget svgIcon(String asset, double size) {
+    return SvgPicture.asset(
+      asset,
+      width: size,
+      height: size,
+      colorFilter:
+      const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+    );
+  }
+
+  // ================= UI =================
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-
     final sx = size.width / MealPlans2._designW;
     final sy = size.height / MealPlans2._designH;
 
     double w(double v) => v * sx;
     double h(double v) => v * sy;
 
-    Widget svgPlaceholder({
-      required String assetPath,
-      required double width,
-      required double height,
-      Color? color,
-    }) {
-      return SvgPicture.asset(
-        assetPath,
-        width: width,
-        height: height,
-        colorFilter: color == null
-            ? null
-            : ColorFilter.mode(color, BlendMode.srcIn),
-        placeholderBuilder: (_) => Container(
-          width: width,
-          height: height,
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.08),
-            borderRadius: BorderRadius.circular(w(6)),
-          ),
-        ),
-      );
-    }
-
-    Widget sectionTitle(String text) => Padding(
-      padding: EdgeInsets.only(bottom: h(6)),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: const Color(0xFFE2F163),
-          fontSize: w(18),
-          fontFamily: 'Poppins',
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-
-    Widget sectionSubtitle(String text) => Padding(
-      padding: EdgeInsets.only(bottom: h(10)),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: Colors.white.withOpacity(0.85),
-          fontSize: w(12),
-          fontFamily: 'League Spartan',
-          fontWeight: FontWeight.w300,
-        ),
-      ),
-    );
-
-    Widget optionRow({
-      required String? groupValue,
-      required void Function(String?) onChanged,
-      required List<String> left,
-      required List<String> right,
-    }) {
-      Widget radioItem(String value) {
-        final isSelected = value == groupValue;
-        return InkWell(
-          onTap: () => onChanged(value),
-          child: Row(
-            children: [
-              Radio<String>(
-                value: value,
-                groupValue: groupValue,
-                onChanged: onChanged,
-                activeColor: const Color(0xFFE2F163),
-              ),
-              Text(
-                value,
-                style: TextStyle(
-                  color: isSelected
-                      ? const Color(0xFFE2F163)
-                      : Colors.white,
-                  fontSize: w(12),
-                  fontFamily: 'League Spartan',
-                  decoration:
-                  isSelected ? TextDecoration.underline : null,
-                ),
-              ),
-            ],
-          ),
-        );
-      }
-
-      return Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Column(children: left.map(radioItem).toList()),
-          ),
-          Expanded(
-            child: Column(children: right.map(radioItem).toList()),
-          ),
-        ],
-      );
-    }
-
-    final bool canContinue =
-        dietaryPref != null && allergy != null && mealType != null;
+    final canContinue =
+        selectedAllergies.isNotEmpty || selectedFoods.isNotEmpty;
 
     return Scaffold(
       backgroundColor: const Color(0xFF212020),
       body: SafeArea(
         child: Stack(
           children: [
-            // ===== BACK BUTTON =====
-            Positioned(
-              left: w(16),
-              top: h(16),
-              child: GestureDetector(
-                onTap: () => Navigator.pushNamed(context,AppRoutes.meal),
-                child: Container(
-                  width: w(36),
-                  height: w(36),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.12),
-                    shape: BoxShape.circle,
-                  ),
-                  alignment: Alignment.center,
-                  child: Icon(
-                    Icons.arrow_back_ios_new,
-                    size: w(16),
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-
-            // ===== CONTENT =====
+            // ================= CONTENT =================
             Positioned.fill(
               child: SingleChildScrollView(
-                padding:
-                EdgeInsets.fromLTRB(w(28), h(16), w(28), h(90)),
+                padding: EdgeInsets.fromLTRB(w(24), h(20), w(24), h(90)),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Padding(
-                      padding: EdgeInsets.only(left: w(30)),
-                      child: Text(
-                        'Meal plans',
-                        style: TextStyle(
-                          color: const Color(0xFF588D6E),
-                          fontSize: w(25),
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w600,
+                    // ===== BACK + TITLE =====
+                    Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () =>
+                              Navigator.pushNamed(context, AppRoutes.meal),
+                          child: Icon(
+                            Icons.arrow_back_ios_new,
+                            color: Colors.white,
+                            size: w(20),
+                          ),
                         ),
-                      ),
+                        SizedBox(width: w(12)),
+                        Text(
+                          'Meal',
+                          style: TextStyle(
+                            color: const Color(0xFF588D6E),
+                            fontSize: w(25),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ),
 
                     SizedBox(height: h(18)),
 
-                    // Dietary Preferences
-                    sectionTitle('Dietary Preferences'),
-                    sectionSubtitle(
-                        'What are your dietary preferences?'),
-                    optionRow(
-                      groupValue: dietaryPref,
-                      onChanged: (v) =>
-                          setState(() => dietaryPref = v),
-                      left: const [
-                        'Vegetarian',
-                        'Vegan',
-                        'Gluten Free'
-                      ],
-                      right: const [
-                        'Keto',
-                        'Paleo',
-                        'No preferences'
-                      ],
-                    ),
-                    SizedBox(height: h(22)),
+                    // ===== TOP TAB NAVBAR =====
+                    Container(
+                      height: h(42),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(w(30)),
+                      ),
+                      child: Row(
+                        children: [
+                          // MEAL PLANS (ACTIVE)
+                          Expanded(
+                            child: Container(
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFE2F163),
+                                borderRadius:
+                                BorderRadius.circular(w(30)),
+                              ),
+                              child: Text(
+                                'Meal Plans',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: w(14),
+                                ),
+                              ),
+                            ),
+                          ),
 
-                    // Allergies
-                    sectionTitle('Allergies'),
-                    sectionSubtitle(
-                        'Do you have any food allergies we should know'),
-                    optionRow(
-                      groupValue: allergy,
-                      onChanged: (v) =>
-                          setState(() => allergy = v),
-                      left: const ['Nuts', 'Dairy', 'Shellfish'],
-                      right: const ['Eggs', 'No allergies'],
+                          // RECOMMENDED
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.pushReplacementNamed(
+                                  context,
+                                  AppRoutes.meal3,
+                                );
+                              },
+                              child: Container(
+                                alignment: Alignment.center,
+                                child: Text(
+                                  'Recommended',
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: w(14),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    SizedBox(height: h(22)),
 
-                    // Meal Types
-                    sectionTitle('Meal Types'),
-                    sectionSubtitle(
-                        'Which meals do you want to plan?'),
-                    optionRow(
-                      groupValue: mealType,
-                      onChanged: (v) =>
-                          setState(() => mealType = v),
-                      left: const ['Breakfast', 'Lunch'],
-                      right: const ['Dinner', 'Snacks'],
+                    SizedBox(height: h(24)),
+
+                    // ===== ALLERGIES =====
+                    _sectionTitle('Allergies', w),
+                    _allergyOptions(w),
+
+                    SizedBox(height: h(24)),
+
+                    // ===== FOOD PREFERRED =====
+                    _sectionTitle('Food Preferred', w),
+
+                    SizedBox(height: h(12)),
+
+                    _isLoadingMeals
+                        ? const Center(child: CircularProgressIndicator())
+                        : SizedBox(
+                      height: h(320),
+                      child: ListView.builder(
+                        itemCount: meals.length,
+                        itemBuilder: (context, index) {
+                          final meal = meals[index];
+                          final name = meal['name'] ?? '';
+                          final category = meal['category'] ?? '';
+                          final calories =
+                              meal['calories']?.toString() ?? '-';
+                          final image = meal['image_url'];
+
+                          final selected =
+                          selectedFoods.contains(name);
+
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                selected
+                                    ? selectedFoods.remove(name)
+                                    : selectedFoods.add(name);
+                              });
+                            },
+                            child: Container(
+                              margin:
+                              EdgeInsets.only(bottom: h(10)),
+                              padding: EdgeInsets.all(w(12)),
+                              decoration: BoxDecoration(
+                                color: selected
+                                    ? const Color(0xFFE2F163)
+                                    .withOpacity(0.9)
+                                    : Colors.white
+                                    .withOpacity(0.08),
+                                borderRadius:
+                                BorderRadius.circular(w(12)),
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: w(60),
+                                    height: w(60),
+                                    decoration: BoxDecoration(
+                                      borderRadius:
+                                      BorderRadius.circular(w(8)),
+                                      image: image != null
+                                          ? DecorationImage(
+                                        image:
+                                        NetworkImage(image),
+                                        fit: BoxFit.cover,
+                                      )
+                                          : null,
+                                      color: Colors.black26,
+                                    ),
+                                  ),
+                                  SizedBox(width: w(12)),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          name,
+                                          style: TextStyle(
+                                            color: selected
+                                                ? Colors.black
+                                                : Colors.white,
+                                            fontWeight:
+                                            FontWeight.w600,
+                                          ),
+                                        ),
+                                        Text(
+                                          category,
+                                          style: TextStyle(
+                                            color: selected
+                                                ? Colors.black54
+                                                : Colors.white70,
+                                            fontSize: w(12),
+                                          ),
+                                        ),
+                                        Text(
+                                          '$calories kcal',
+                                          style: TextStyle(
+                                            color: selected
+                                                ? Colors.black54
+                                                : Colors.white70,
+                                            fontSize: w(12),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                     ),
-                    SizedBox(height: h(26)),
 
-                    // Continue Button
+                    SizedBox(height: h(28)),
+
+                    // ===== CONTINUE =====
                     Center(
                       child: GestureDetector(
                         onTap: canContinue
-                            ? () {
-                          Navigator.pushNamed(
-                            context,
-                            AppRoutes.meal3, // ⬅️ page berikutnya
-                            arguments: {
-                              'dietaryPref': dietaryPref,
-                              'allergy': allergy,
-                              'mealType': mealType,
-                            },
+                            ? () async {
+                          final token = await _getToken();
+                          if (token == null) return;
+
+                          final response =
+                          await ApiService.foodPreferences(
+                            token: token,
+                            allergies:
+                            selectedAllergies.contains('None')
+                                ? []
+                                : selectedAllergies,
+                            preferredFoods: selectedFoods,
                           );
+
+                          if (response.statusCode == 200 ||
+                              response.statusCode == 201) {
+                            Navigator.pushReplacementNamed(
+                              context,
+                              AppRoutes.meal3,
+                            );
+                          }
                         }
                             : null,
                         child: Opacity(
@@ -256,12 +332,10 @@ class _MealPlans2State extends State<MealPlans2> {
                               border:
                               Border.all(color: Colors.white),
                             ),
-                            child: Text(
+                            child: const Text(
                               'Continue',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: w(16),
-                                fontFamily: 'Poppins',
                                 fontWeight: FontWeight.w600,
                                 decoration:
                                 TextDecoration.underline,
@@ -276,7 +350,7 @@ class _MealPlans2State extends State<MealPlans2> {
               ),
             ),
 
-            // ===== BOTTOM NAVBAR (template kamu) =====
+            // ================= BOTTOM NAVBAR =================
             Positioned(
               left: 0,
               right: 0,
@@ -290,42 +364,26 @@ class _MealPlans2State extends State<MealPlans2> {
                     GestureDetector(
                       onTap: () =>
                           Navigator.pushNamed(context, AppRoutes.home),
-                      child: svgPlaceholder(
-                        assetPath: 'assets/icons/logo-home2.svg',
-                        width: w(26),
-                        height: w(26),
-                        color: Colors.white,
-                      ),
+                      child: svgIcon(
+                          'assets/icons/logo-home2.svg', w(26)),
                     ),
                     GestureDetector(
-                      onTap: () => Navigator.pushNamed(
-                          context, AppRoutes.tracking),
-                      child: svgPlaceholder(
-                        assetPath: 'assets/icons/icon-doc.svg',
-                        width: w(26),
-                        height: w(26),
-                        color: Colors.white,
-                      ),
+                      onTap: () =>
+                          Navigator.pushNamed(context, AppRoutes.tracking),
+                      child: svgIcon(
+                          'assets/icons/icon-doc.svg', w(26)),
                     ),
                     GestureDetector(
                       onTap: () =>
                           Navigator.pushNamed(context, AppRoutes.home),
-                      child: svgPlaceholder(
-                        assetPath: 'assets/icons/logo-star.svg',
-                        width: w(26),
-                        height: w(26),
-                        color: Colors.white,
-                      ),
+                      child: svgIcon(
+                          'assets/icons/logo-star.svg', w(26)),
                     ),
                     GestureDetector(
-                      onTap: () => Navigator.pushNamed(
-                          context, AppRoutes.profile),
-                      child: svgPlaceholder(
-                        assetPath: 'assets/icons/logo-profile2.svg',
-                        width: w(26),
-                        height: w(26),
-                        color: Colors.white,
-                      ),
+                      onTap: () =>
+                          Navigator.pushNamed(context, AppRoutes.chatbot),
+                      child: svgIcon(
+                          'assets/icons/logo-profile2.svg', w(26)),
                     ),
                   ],
                 ),
@@ -336,4 +394,52 @@ class _MealPlans2State extends State<MealPlans2> {
       ),
     );
   }
+
+  // ================= ALLERGY OPTIONS =================
+  Widget _allergyOptions(double Function(double) w) {
+    final options = ['None', 'Nuts', 'Dairy', 'Shellfish', 'Eggs'];
+
+    return Wrap(
+      spacing: w(10),
+      runSpacing: w(8),
+      children: options.map((value) {
+        final selected = selectedAllergies.contains(value);
+        return FilterChip(
+          label: Text(value),
+          selected: selected,
+          onSelected: (_) {
+            setState(() {
+              if (value == 'None') {
+                selectedAllergies.clear();
+                selectedAllergies.add('None');
+              } else {
+                selectedAllergies.remove('None');
+                selected
+                    ? selectedAllergies.remove(value)
+                    : selectedAllergies.add(value);
+              }
+            });
+          },
+          selectedColor: const Color(0xFFE2F163),
+          labelStyle: TextStyle(
+            color: selected ? Colors.black : Colors.white,
+          ),
+          backgroundColor: Colors.white.withOpacity(0.1),
+        );
+      }).toList(),
+    );
+  }
 }
+
+// ================= HELPER =================
+Widget _sectionTitle(String text, double Function(double) w) => Padding(
+  padding: const EdgeInsets.only(bottom: 6),
+  child: Text(
+    text,
+    style: TextStyle(
+      color: const Color(0xFFE2F163),
+      fontSize: w(18),
+      fontWeight: FontWeight.w600,
+    ),
+  ),
+);

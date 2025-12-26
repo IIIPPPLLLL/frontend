@@ -199,7 +199,7 @@ class ProgressTracking extends StatelessWidget {
                   ),
                 ),
                 GestureDetector(
-                  onTap: () => Navigator.pushNamed(context, AppRoutes.profile),
+                  onTap: () => Navigator.pushNamed(context, AppRoutes.chatbot),
                   child: SvgPicture.asset(
                     'assets/icons/logo-profile2.svg',
                     width: 26,

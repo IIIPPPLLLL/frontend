@@ -147,7 +147,7 @@ class _RecipeState extends State<Recipe> {
                     ),
                   ),
                   GestureDetector(
-                    onTap: () => Navigator.pushNamed(context, AppRoutes.profile),
+                    onTap: () => Navigator.pushNamed(context, AppRoutes.chatbot),
                     child: svgPlaceholder(
                       assetPath: 'assets/icons/logo-profile2.svg',
                       width: w(26),

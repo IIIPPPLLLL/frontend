@@ -1,268 +1,177 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import '../routes/app_routes.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 
-class Notification1 extends StatelessWidget {
+import '../routes/app_routes.dart';
+import '../service/api_service.dart';
+
+class Notification1 extends StatefulWidget {
   const Notification1({super.key});
 
-  // biar w()/h() jalan (nyamain pola figma)
-  static const double _designW = 393;
-  static const double _designH = 852;
+  @override
+  State<Notification1> createState() => _Notification1State();
+}
 
-  void safeBack(BuildContext context) {
-    if (Navigator.canPop(context)) {
-      Navigator.pop(context);
-    } else {
-      Navigator.pushNamed(context, AppRoutes.home);
+class _Notification1State extends State<Notification1> {
+  bool isLoading = true;
+  List<Map<String, dynamic>> notifications = [];
+
+  // ================= TOKEN =================
+  Future<String?> _getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('token');
+  }
+
+  // ================= FETCH =================
+  Future<void> _loadNotifications({bool showLoading = true}) async {
+    if (showLoading) setState(() => isLoading = true);
+
+    try {
+      final token = await _getToken();
+      if (token == null) return;
+
+      final res = await ApiService.getNotifications(token);
+
+      if (res is List) {
+        final data = res
+            .whereType<Map>()
+            .map((e) => Map<String, dynamic>.from(e))
+            .toList();
+
+        data.sort((a, b) => _getDate(b).compareTo(_getDate(a)));
+        setState(() => notifications = data);
+      }
+    } finally {
+      setState(() => isLoading = false);
     }
   }
 
+  // ================= HELPERS =================
+  String getNotificationId(Map<String, dynamic> n) {
+    return n['_id']['\$oid'];
+  }
+
+  DateTime _getDate(Map<String, dynamic> n) {
+    try {
+      final ms =
+      int.parse(n['created_at']['\$date']['\$numberLong']);
+      return DateTime.fromMillisecondsSinceEpoch(ms);
+    } catch (_) {
+      return DateTime.now();
+    }
+  }
+
+  bool _isUnread(Map<String, dynamic> n) =>
+      n['is_read'] != true;
+
+  String _timeAgo(DateTime date) {
+    final diff = DateTime.now().difference(date);
+    if (diff.inMinutes < 1) return 'Baru saja';
+    if (diff.inHours < 1) return '${diff.inMinutes}m lalu';
+    if (diff.inDays < 1) return '${diff.inHours}j lalu';
+    return DateFormat('dd/MM/yyyy').format(date);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadNotifications();
+  }
+
+  // ================= UI =================
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final sx = size.width / _designW;
-    final sy = size.height / _designH;
-
-    double w(double v) => v * sx;
-    double h(double v) => v * sy;
-
-    Widget svgPlaceholder({
-      required String assetPath,
-      required double width,
-      required double height,
-      Color? color,
-    }) {
-      return SvgPicture.asset(
-        assetPath,
-        width: width,
-        height: height,
-        colorFilter: color == null
-            ? null
-            : ColorFilter.mode(color, BlendMode.srcIn),
-        placeholderBuilder: (_) => Container(
-          width: width,
-          height: height,
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.10),
-            borderRadius: BorderRadius.circular(w(6)),
-          ),
-        ),
-      );
-    }
+    final unread = notifications.where(_isUnread).toList();
+    final read =
+    notifications.where((n) => !_isUnread(n)).toList();
 
     return Scaffold(
       backgroundColor: const Color(0xFF212020),
       body: SafeArea(
         child: Stack(
           children: [
-            // Main Content
-            SingleChildScrollView(
-              child: Container(
-                width: MediaQuery.of(context).size.width,
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // ===== HEADER =====
-                    const SizedBox(height: 18),
-                    Row(
-                      children: [
-                        GestureDetector(
-                          onTap: () => safeBack(context),
-                          child: Container(
-                            width: 28,
-                            height: 28,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(14),
-                              color: Colors.white.withOpacity(0.10),
+            // ================= CONTENT =================
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Notifications',
+                    style: TextStyle(
+                      color: Color(0xFF588D6E),
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  Expanded(
+                    child: isLoading
+                        ? const Center(
+                      child: CircularProgressIndicator(),
+                    )
+                        : RefreshIndicator(
+                      onRefresh: () =>
+                          _loadNotifications(showLoading: false),
+                      child: ListView(
+                        children: [
+                          if (unread.isNotEmpty) ...[
+                            _sectionTitle('Belum Dibaca'),
+                            ...unread.map(_item),
+                            const SizedBox(height: 24),
+                          ],
+                          if (read.isNotEmpty) ...[
+                            _sectionTitle('Sudah Dibaca'),
+                            ...read.map(_item),
+                          ],
+                          if (unread.isEmpty && read.isEmpty)
+                            const Center(
+                              child: Text(
+                                'Belum ada notifikasi',
+                                style: TextStyle(
+                                    color: Colors.white54),
+                              ),
                             ),
-                            child: const Icon(
-                              Icons.arrow_back,
-                              color: Colors.white,
-                              size: 18,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        const Text(
-                          'Notifications',
-                          style: TextStyle(
-                            color: Color(0xFF588D6E),
-                            fontSize: 20,
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    // ===== REMINDERS TAB =====
-                    const SizedBox(height: 18),
-                    Container(
-                      width: double.infinity,
-                      height: 34,
-                      padding: const EdgeInsets.symmetric(vertical: 6),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE2F163),
-                        borderRadius: BorderRadius.circular(38),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          'Reminders',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Color(0xFF232222),
-                            fontSize: 17,
-                            fontFamily: 'League Spartan',
-                            fontWeight: FontWeight.w500,
-                            height: 1.18,
-                            letterSpacing: -0.09,
-                          ),
-                        ),
+                        ],
                       ),
                     ),
-
-                    // ===== TODAY =====
-                    const SizedBox(height: 18),
-                    const Text(
-                      'Today',
-                      style: TextStyle(
-                        color: Color(0xFFE2F163),
-                        fontSize: 12,
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-
-                    _buildNotificationItem(
-                      iconColor: const Color(0xFF34C759),
-                      title: 'New workout is Available',
-                      time: 'June 10 - 10:00 AM',
-                      showSmallCircle: false,
-                    ),
-                    const SizedBox(height: 12),
-                    _buildNotificationItem(
-                      iconColor: const Color(0xFFE2F163),
-                      title: 'Don\'t forget to drink water',
-                      time: 'June 10 - 8:00 AM',
-                      showSmallCircle: true,
-                    ),
-
-                    // ===== YESTERDAY =====
-                    const SizedBox(height: 20),
-                    const Text(
-                      'Yesterday',
-                      style: TextStyle(
-                        color: Color(0xFFE2F163),
-                        fontSize: 12,
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-
-                    _buildNotificationItem(
-                      iconColor: const Color(0xFFE2F163),
-                      title: 'Upper Body Workout Completed!',
-                      time: 'June 09 - 6:00 pM',
-                      showSmallCircle: true,
-                    ),
-                    const SizedBox(height: 12),
-                    _buildNotificationItem(
-                      iconColor: const Color(0xFF34C759),
-                      title: 'Remember Your Exercise Session',
-                      time: 'June 09 - 3:00 pM',
-                      showSmallCircle: false,
-                    ),
-                    const SizedBox(height: 12),
-                    _buildNotificationItem(
-                      iconColor: const Color(0xFF34C759),
-                      title: 'new Article & Tip posted!',
-                      time: 'June 09 - 11:00 aM',
-                      showSmallCircle: false,
-                    ),
-
-                    // ===== MAY 29 =====
-                    const SizedBox(height: 20),
-                    const Text(
-                      'May 29 - 20XX',
-                      style: TextStyle(
-                        color: Color(0xFFE2F163),
-                        fontSize: 12,
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-
-                    _buildNotificationItem(
-                      iconColor: const Color(0xFF34C759),
-                      title: 'You started a new challenge!',
-                      time: 'May 29 - 9:00 AM',
-                      showSmallCircle: false,
-                    ),
-                    const SizedBox(height: 12),
-                    _buildNotificationItem(
-                      iconColor: const Color(0xFF34C759),
-                      title: 'New House training ideas!',
-                      time: 'May 29 - 8:20 AM',
-                      showSmallCircle: false,
-                    ),
-
-                    // Space for bottom navbar
-                    const SizedBox(height: 92),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
 
-            // ✅ NAVBAR (DIGANTI SESUAI SNIPPET KAMU)
+            // ================= NAVBAR (PERSIS PUNYA KAMU) =================
             Positioned(
               left: 0,
               right: 0,
               bottom: 0,
               child: Container(
-                height: h(59),
+                height: 59,
                 color: const Color(0xFF588D6E),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    GestureDetector(
-                      onTap: () => Navigator.pushNamed(context, AppRoutes.home),
-                      child: svgPlaceholder(
-                        assetPath: 'assets/icons/logo-home2.svg',
-                        width: w(26),
-                        height: w(26),
-                        color: Colors.white,
-                      ),
+                    _navIcon(
+                      'assets/icons/logo-home2.svg',
+                          () => Navigator.pushNamed(
+                          context, AppRoutes.home),
                     ),
-                    GestureDetector(
-                      onTap: () => Navigator.pushNamed(context, AppRoutes.tracking),
-                      child: svgPlaceholder(
-                        assetPath: 'assets/icons/icon-doc.svg',
-                        width: w(26),
-                        height: w(26),
-                        color: Colors.white,
-                      ),
+                    _navIcon(
+                      'assets/icons/icon-doc.svg',
+                          () => Navigator.pushNamed(
+                          context, AppRoutes.tracking),
                     ),
-                    GestureDetector(
-                      onTap: () => Navigator.pushNamed(context, AppRoutes.home),
-                      child: svgPlaceholder(
-                        assetPath: 'assets/icons/logo-star.svg',
-                        width: w(26),
-                        height: w(26),
-                        color: Colors.white,
-                      ),
+                    _navIcon(
+                      'assets/icons/logo-star.svg',
+                          () => Navigator.pushNamed(
+                          context, AppRoutes.home),
                     ),
-                    GestureDetector(
-                      onTap: () => Navigator.pushNamed(context, AppRoutes.profile),
-                      child: svgPlaceholder(
-                        assetPath: 'assets/icons/logo-profile2.svg',
-                        width: w(26),
-                        height: w(26),
-                        color: Colors.white,
-                      ),
+                    _navIcon(
+                      'assets/icons/logo-profile2.svg',
+                          () => Navigator.pushNamed(
+                          context, AppRoutes.chatbot),
                     ),
                   ],
                 ),
@@ -274,89 +183,115 @@ class Notification1 extends StatelessWidget {
     );
   }
 
-  Widget _buildNotificationItem({
-    required Color iconColor,
-    required String title,
-    required String time,
-    required bool showSmallCircle,
-  }) {
-    return Container(
-      width: double.infinity,
-      height: 64,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(36),
+  // ================= COMPONENT =================
+  Widget _sectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Text(
+        title,
+        style: const TextStyle(
+          color: Color(0xFF588D6E),
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+        ),
       ),
-      child: Row(
-        children: [
-          // Icon Container
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Container(
-                width: 45,
-                height: 45,
-                decoration: BoxDecoration(
-                  color: iconColor,
-                  shape: BoxShape.circle,
-                ),
-                child: const Center(
-                  child: Icon(
-                    Icons.notifications,
-                    color: Colors.white,
-                    size: 22,
-                  ),
-                ),
-              ),
-              if (showSmallCircle)
-                Positioned(
-                  left: -2,
-                  top: 2,
-                  child: Container(
-                    width: 13,
-                    height: 13,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFB3A0FF),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ),
+    );
+  }
+
+  Widget _item(Map<String, dynamic> n) {
+    final unread = _isUnread(n);
+
+    return GestureDetector(
+      onTap: () async {
+        final token = await _getToken();
+        final id = getNotificationId(n);
+
+        if (unread && token != null) {
+          await ApiService.readNotification(token, id);
+          await _loadNotifications(showLoading: false);
+        }
+
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: Text(n['title']),
+            content: Text(n['message']),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Tutup'),
+              )
             ],
           ),
-          const SizedBox(width: 14),
-
-          // Text
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Color(0xFF232222),
-                    fontSize: 13,
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  time,
-                  style: const TextStyle(
-                    color: Color(0xFF588D6E),
-                    fontSize: 12,
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: unread
+              ? Border.all(color: const Color(0xFF588D6E))
+              : null,
+        ),
+        child: Row(
+          children: [
+            const CircleAvatar(
+              backgroundColor: Color(0xFF588D6E),
+              child:
+              Icon(Icons.notifications, color: Colors.white),
             ),
-          ),
-        ],
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    n['title'],
+                    style: TextStyle(
+                      color: Colors.black, // ✅ TEKS HITAM
+                      fontWeight: unread
+                          ? FontWeight.bold
+                          : FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    n['message'],
+                    style:
+                    const TextStyle(color: Colors.black),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    _timeAgo(_getDate(n)),
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Colors.black54,
+                    ),
+                  )
+                ],
+              ),
+            ),
+            if (unread)
+              const Icon(Icons.circle,
+                  size: 10, color: Colors.red),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _navIcon(String asset, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: SvgPicture.asset(
+        asset,
+        width: 24,
+        height: 24,
+        color: Colors.white,
       ),
     );
   }

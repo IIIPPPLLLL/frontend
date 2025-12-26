@@ -236,7 +236,7 @@ class _Nutritionist1State extends State<Nutritionist1> {
                     ),
                   ),
                   GestureDetector(
-                    onTap: () => Navigator.pushNamed(context, AppRoutes.profile),
+                    onTap: () => Navigator.pushNamed(context, AppRoutes.chatbot),
                     child: svgIcon(
                       assetPath: 'assets/icons/logo-profile2.svg',
                       size: w(26),

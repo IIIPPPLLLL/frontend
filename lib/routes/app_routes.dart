@@ -37,6 +37,9 @@ import '../views/trainer1.dart';
 import '../views/trainer2.dart';
 import '../views/nutri1.dart';
 import '../views/nutri2.dart';
+import '../views/chatbot.dart';
+import '../views/profileHome.dart';
+
 
 class AppRoutes {
   static const String splash = '/';
@@ -72,6 +75,8 @@ class AppRoutes {
   static const String trainer2 = '/Trainer2';
   static const String nutri1 = '/Nutritionist1';
   static const String nutri2 = '/Nutritionist2';
+  static const String chatbot = '/ChatBotPage';
+  static const String homeprofile = '/ProfileHome';
 
 
 
@@ -110,6 +115,8 @@ class AppRoutes {
     trainer1: (context) => Trainer(),
     trainer2: (context) => Trainer2(),
     nutri1: (context) => Nutritionist1(),
-    nutri2: (context) => Nutritionist2()
+    nutri2: (context) => Nutritionist2(),
+    chatbot: (context) => ChatBotPage(),
+    homeprofile: (context) => ProfileHome()
   };
 }

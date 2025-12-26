@@ -85,12 +85,11 @@ class _WeightState extends State<Weight> {
         // Tampilkan success message
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Height saved!'),
+            content: Text('Weight saved!'),
             backgroundColor: Colors.green,
             duration: Duration(milliseconds: 800),
           ),
-        );
-
+        );await Future.delayed(const Duration(milliseconds: 300));
         // Jika berhasil, navigasi ke halaman berikutnya
         Navigator.pushNamed(
           context,
